@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Posicoes {
+  GOL
+  ZAG
+  LAT
+  MEI
+  ATA
+}
+
+enum Condicao {
+  LIVRE
+  MAL_CONDICIONADO
+  DOENTE
+}
+model Jogadores {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  posicao Posicoes
+  agilidade Int    
+  idade Int
+  valor_base Decimal @db.Decimal(6,2)
+  condicao Condicao
+  clube_id Int?
+  velocidade Int
+  finalizacao Int
+  passe Int
+  drible Int
+  defesa Int
+  fisico Int
+  potencial Int
+  excluido_em DateTime @map("excluido_em")
+  atualizado_em DateTime @map("atualizado_em")
+  createdAt DateTime @default(now()) @map("created_at")
+}
