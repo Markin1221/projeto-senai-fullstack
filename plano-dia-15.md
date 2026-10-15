@@ -23,19 +23,21 @@ Linha de corte: **1 a 4 precisam estar prontos hoje.** Histórico e CSV podem es
 
 ## Bloco 0: Pendência do dia 14 (~20 min)
 
-- [ ] Rodar `prisma migrate reset --force` e confirmar que o banco recria do zero e vazio.
-- [ ] Anotar os comandos exatos (subir banco, aplicar migrations, recriar do zero) para o `README.md` da raiz.
-- [ ] Commit da migration.
+- [x] Rodar `prisma migrate reset --force` e confirmar que o banco recria do zero e vazio.
+- [x] Anotar os comandos exatos (subir banco, aplicar migrations, recriar do zero) para o `README.md` da raiz.
+- [x] Commit da migration.
 
 ## Bloco 1: Jogadores (manhã, ~3h)
 
 Tudo o que estava no `claude/plano-hoje.md` (dia 14) nos itens 4.1 e 4.2 continua valendo. Resumo da ordem:
 
 ### 1.1 Regras puras, com testes (~1h)
-- [ ] Um arquivo único de regras: `calcularOverall`, `calcularValorBase`, `calcularValorMercado`.
-- [ ] Testes unitários com as tabelas do `README.md`: overall (5 linhas), valor base (9 linhas), valor de mercado (10 linhas). Rode e veja passar antes de continuar.
+
+- [x] Um arquivo único de regras: `calcularOverall`, `calcularValorBase`, `calcularValorMercado`.
+- [x] Testes unitários com as tabelas do `README.md`: overall (5 linhas), valor base (9 linhas), valor de mercado (10 linhas). Rode e veja passar antes de continuar.
 
 ### 1.2 Endpoints (~2h, um commit por endpoint)
+
 - [ ] `POST /players` (201 + `Location`), com validações V1 a V9 e limites de cada campo
 - [ ] `GET /players/{id}`
 - [ ] `PATCH /players/{id}/condition`
@@ -61,11 +63,13 @@ Tudo o que estava no `claude/plano-hoje.md` (dia 14) nos itens 4.1 e 4.2 continu
 ## Bloco 3: Compra e venda (tarde e início da noite, ~3h)
 
 ### 3.0 Utilitário de datas (~20 min)
+
 - [ ] Parse estrito de `AAAA-MM-DDTHH:MM-03:00` (regex + validar que a data existe, sem ajuste: `2027-02-30` e `T24:00` são 400).
 - [ ] Formatação das respostas em `AAAA-MM-DDTHH:MM:SS-03:00`.
 - [ ] Testes: formato sem `-03:00`, data inexistente, hora 24:00.
 
 ### 3.1 `POST /players/{id}/buy` (200)
+
 - Corpo: `club_id` (inteiro positivo; 0 ou negativo é 400; inexistente é 404) e `loyalty_until`.
 - `loyalty_until`: depois do momento da compra e até **1.095 dias** depois; fora disso, 400.
 - Regras (409): jogador não livre; custo total > 50% do caixa (comparar **sem arredondar**: com caixa 261,15 o limite é 130,575, e 130,58 é recusado; igual ao limite é aceito); elenco com 12 jogadores; recompra (o próprio clube já vendeu esse jogador).
@@ -76,6 +80,7 @@ Tudo o que estava no `claude/plano-hoje.md` (dia 14) nos itens 4.1 e 4.2 continu
 - [ ] Testes unitários: taxa (28,00 → 0,00; 30,00 → 0,00; 30,01 → 1,50), limite de 50% (100,00 / 47,62 aceita; 48,00 recusa).
 
 ### 3.2 `POST /players/{id}/sell` (200, sem corpo)
+
 - 404 para jogador inexistente ou excluído; 409 para jogador livre.
 - Venda sempre pelo **clube atual** do jogador.
 - Cálculo, nesta ordem: valor de venda (valor de mercado agora) → dias restantes (função do Bloco 2) → multa (percentual × valor, arredondada, **teto 10,00**) → lucro (valor − `valor_compra` do contrato ATIVO) → comissão progressiva só se lucro > 0 (10% até 10,00 + 20% acima de 10,00, arredondada **uma vez no final**) → crédito = valor − multa − comissão.
@@ -85,6 +90,7 @@ Tudo o que estava no `claude/plano-hoje.md` (dia 14) nos itens 4.1 e 4.2 continu
 - [ ] Testes unitários com as duas tabelas da RN16 (comissão: 3,00 → 0,30; 3,85 → 0,39; 10,00 → 1,00; 10,01 → 1,00; 15,00 → 2,00; −7,50 → 0,00; e as 5 linhas valor de compra × venda, incluindo a de multa limitada a 10,00).
 
 ### 3.3 Teste de fluxo (curl ou arquivo `.http`)
+
 - [ ] Reproduzir o fluxo do `README.md` (2.1.3 a 2.3.2): cadastrar Meia Lua, mudar condição, criar Águias FC, comprar, consultar o clube, voltar a APTO, vender.
 - [ ] Confirmar o invariante: **300,00 + soma de `variacao_caixa` = caixa atual**.
 - [ ] Confirmar que recusas (409, 404, 400) não gravam nada.
