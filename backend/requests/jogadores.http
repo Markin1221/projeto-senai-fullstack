@@ -1,0 +1,89 @@
+@host = http://localhost:3000/api/v1
+
+### Cadastro válido: 201 + Location, valor base 40, overall 75
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Meia Lua", "position": "MEI", "agility": 85, "age": 25,
+  "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86
+}
+
+### Espaços extras no nome (V4) e campos ignorados (V7): 201, nome "Davi Melo"
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "   Davi    Melo ", "position": "MEI", "agility": 70, "age": 23,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 82,
+  "base_value": 999, "club_id": 1, "condition": "DOENTE", "overall": 1
+}
+
+### Jovem promessa (21 anos): valor base com bônus
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Rafa Jovem", "position": "ATA", "agility": 70, "age": 21,
+  "pace": 70, "shooting": 75, "passing": 60, "dribbling": 70, "defending": 40, "physical": 60, "potential": 90
+}
+
+### 400: corpo é array
+POST {{host}}/players
+Content-Type: application/json
+
+[1]
+
+### 400: nome com uma palavra só e idade fora do limite
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Pele", "position": "MEI", "agility": 70, "age": 15,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 82
+}
+
+### 400: tipo errado (texto no lugar de número) e posição em minúsculas
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Davi Melo", "position": "mei", "agility": "70", "age": 23,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 82
+}
+
+### 400: soma dos atributos passa de 480
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Davi Melo", "position": "MEI", "agility": 70, "age": 23,
+  "pace": 90, "shooting": 90, "passing": 90, "dribbling": 90, "defending": 90, "physical": 90, "potential": 95
+}
+
+### 400: potencial menor que o maior atributo
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Davi Melo", "position": "MEI", "agility": 70, "age": 23,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 70
+}
+
+### 400: 33 anos com potencial diferente do maior atributo
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Davi Melo", "position": "MEI", "agility": 70, "age": 33,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 80
+}
+
+### 400: 35 anos com agilidade acima de 85
+POST {{host}}/players
+Content-Type: application/json
+
+{
+  "name": "Davi Melo", "position": "MEI", "agility": 90, "age": 35,
+  "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 74
+}
