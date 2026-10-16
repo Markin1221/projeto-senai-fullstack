@@ -38,7 +38,13 @@ Tudo o que estava no `claude/plano-hoje.md` (dia 14) nos itens 4.1 e 4.2 continu
 
 ### 1.2 Endpoints (~2h, um commit por endpoint)
 
-w
+- [x] `POST /players` (201 + `Location`), com validações V1 a V9 e limites de cada campo
+- [x] `GET /players/{id}`
+- [x] `PATCH /players/{id}/condition`
+  - **Adicione agora** a regra RN19.5: se o jogador passa a `DOENTE`, remover a linha dele em `escalacoes`, na mesma transação. A tabela já existe, então é uma linha de código.
+- [ ] `PUT /players/{id}`
+- [ ] `DELETE /players/{id}` (204, só livre, exclusão lógica)
+- [ ] `GET /players` com filtros, ordenação e paginação (estratégia em memória, descrita no dia 14)
 
 ## Bloco 2: Clubes (início da tarde, ~1,5h)
 

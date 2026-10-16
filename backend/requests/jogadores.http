@@ -87,3 +87,9 @@ Content-Type: application/json
   "name": "Davi Melo", "position": "MEI", "agility": 90, "age": 35,
   "pace": 66, "shooting": 62, "passing": 74, "dribbling": 70, "defending": 48, "physical": 58, "potential": 74
 }
+
+
+### Buscar jogador por ID
+GET {{host}}/players/1
+
+Patch {{host}}/players/1/condition
