@@ -6,11 +6,11 @@ Repositório com `backend/` (NestJS, Prisma e PostgreSQL) e `frontend/` (React, 
 
 ## 1. Pré-requisitos
 
-| Ferramenta | Versão |
-| --- | --- |
-| Node.js (com npm) | 22 LTS |
-| Docker e Docker Compose | Docker Engine 24 ou superior, Compose v2 |
-| PostgreSQL | 16 (imagem `postgres:16`, subida pelo Docker Compose) |
+| Ferramenta              | Versão                                                |
+| ----------------------- | ----------------------------------------------------- |
+| Node.js (com npm)       | 22 LTS                                                |
+| Docker e Docker Compose | Docker Engine 24 ou superior, Compose v2              |
+| PostgreSQL              | 16 (imagem `postgres:16`, subida pelo Docker Compose) |
 
 Versões das principais dependências: NestJS 12, Prisma 6, TypeScript 6 e Jest 30. Os arquivos de trava (`backend/package-lock.json`) estão versionados.
 
@@ -71,11 +71,11 @@ npm test
 
 Arquivo `backend/.env.example` (copie para `backend/.env`):
 
-| Variável | Para que serve | Exemplo |
-| --- | --- | --- |
-| `DATABASE_URL` | Conexão do Prisma com o PostgreSQL | `postgresql://passe:passe_dev@localhost:5432/passe?schema=public` |
-| `PORT` | Porta da API | `3000` |
-| `CORS_ORIGIN` | Origem do frontend aceita pelo CORS (lista separada por vírgula; `*` não é aceito) | `http://localhost:3001` |
+| Variável       | Para que serve                                                                     | Exemplo                                                           |
+| -------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `DATABASE_URL` | Conexão do Prisma com o PostgreSQL                                                 | `postgresql://passe:passe_dev@localhost:5432/passe?schema=public` |
+| `PORT`         | Porta da API                                                                       | `3000`                                                            |
+| `CORS_ORIGIN`  | Origem do frontend aceita pelo CORS (lista separada por vírgula; `*` não é aceito) | `http://localhost:3001`                                           |
 
 A senha `passe_dev` é só do banco local do Docker Compose, usado em desenvolvimento.
 
@@ -98,29 +98,29 @@ backend/
 frontend/                   a iniciar
 ```
 
-| Biblioteca | Motivo |
-| --- | --- |
-| NestJS (`@nestjs/*`) e Express | Framework da API REST |
-| Prisma (`prisma`, `@prisma/client`) | ORM, migrations versionadas e acesso ao PostgreSQL |
-| `class-validator` e `class-transformer` | Validação declarativa dos DTOs (corpo e query params) |
-| `decimal.js` | Cálculos de dinheiro sem `float`, com arredondamento "meio para longe do zero" |
-| `dotenv` | Leitura do `.env` |
-| `reflect-metadata` e `rxjs` | Exigidas pelo NestJS |
-| Jest e `ts-jest` | Testes unitários das regras de negócio |
-| `oxlint` e Prettier | Lint e formatação do código |
+| Biblioteca                              | Motivo                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------------------ |
+| NestJS (`@nestjs/*`) e Express          | Framework da API REST                                                          |
+| Prisma (`prisma`, `@prisma/client`)     | ORM, migrations versionadas e acesso ao PostgreSQL                             |
+| `class-validator` e `class-transformer` | Validação declarativa dos DTOs (corpo e query params)                          |
+| `decimal.js`                            | Cálculos de dinheiro sem `float`, com arredondamento "meio para longe do zero" |
+| `dotenv`                                | Leitura do `.env`                                                              |
+| `reflect-metadata` e `rxjs`             | Exigidas pelo NestJS                                                           |
+| Jest e `ts-jest`                        | Testes unitários das regras de negócio                                         |
+| `oxlint` e Prettier                     | Lint e formatação do código                                                    |
 
 ## 6. Funcionalidades
 
-| Funcionalidade | Situação |
-| --- | --- |
-| Jogadores: `POST`, `GET` (lista e por id), `PUT`, `PATCH /condition` e `DELETE` | Pronto |
-| Valor base, overall e valor de mercado (RN02 a RN06), com testes | Pronto |
-| Clubes: `POST`, `GET` (lista e por id) | Pronto |
-| Compra (`POST /players/{id}/buy`) e venda (`POST /players/{id}/sell`) | Pronto |
-| Histórico de transações e exportação CSV | Pronto |
-| Escalação (`PUT` e `GET /clubs/{id}/lineup`) | A fazer |
-| Partidas, histórico de partidas e classificação | A fazer |
-| Frontend | A fazer |
+| Funcionalidade                                                                  | Situação |
+| ------------------------------------------------------------------------------- | -------- |
+| Jogadores: `POST`, `GET` (lista e por id), `PUT`, `PATCH /condition` e `DELETE` | Pronto   |
+| Valor base, overall e valor de mercado (RN02 a RN06), com testes                | Pronto   |
+| Clubes: `POST`, `GET` (lista e por id)                                          | Pronto   |
+| Compra (`POST /players/{id}/buy`) e venda (`POST /players/{id}/sell`)           | Pronto   |
+| Histórico de transações e exportação CSV                                        | Pronto   |
+| Escalação (`PUT` e `GET /clubs/{id}/lineup`)                                    | A fazer  |
+| Partidas, histórico de partidas e classificação                                 | A fazer  |
+| Frontend                                                                        | A fazer  |
 
 ## 7. Decisões e premissas
 
@@ -145,4 +145,4 @@ Escalação, partidas, histórico de partidas, classificação e o frontend est�
 - **Ferramenta:** Claude (Anthropic), usado como consultor e apoio durante o desenvolvimento.
 - **Onde:** regras de negócio e seus testes (`backend/src/regras/`), utilitários e validadores (`backend/src/common/`), infraestrutura do Prisma (`backend/src/prisma/`), partes dos módulos `jogadores`, `clubes`, `mercado` e `historico`, arquivos `.http` de exemplo e este README.
 - **Como e por quê:** para guiar a ordem das tarefas, explicar as regras do enunciado, revisar erros de migration e de tipos e gerar código de partes repetitivas ou com muitas regras de validação, ganhando tempo.
-- **O que foi aceito, alterado ou descartado:** _completar com o que você alterou ou descartou do código sugerido (por exemplo: os DTOs e o service dos endpoints de condição e de edição foram escritos por mim e ajustados; o teste de exemplo do Nest foi removido)._
+- **O que foi aceito, alterado ou descartado:** maior parte dos arquivos, como tem um tempo pequeno pra fazer o desafio eu poderia fazer tudo na mão mas boa parte dos arquivos grandes eu peço pro claude gerar, leio ele pra ver se a logica ta certa e aceito, alguns faço na mao principalmente quando acaba, mas leve do presuposto que a maioria tem a ia me auxiliando mais como um estagiario ao lado.\_
