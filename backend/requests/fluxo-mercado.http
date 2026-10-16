@@ -1,0 +1,84 @@
+@host = http://localhost:3000/api/v1
+
+### 1. Cadastrar Meia Lua
+# @name jogador
+POST {{host}}/players
+Content-Type: application/json
+
+{ "name": "Meia Lua", "position": "MEI", "agility": 85, "age": 25,
+  "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### 2. MAL_CONDICIONADO (market_value 37)
+PATCH {{host}}/players/{{jogador.response.body.id}}/condition
+Content-Type: application/json
+
+{ "condition": "MAL_CONDICIONADO" }
+
+### 3. Criar clube
+# @name clube
+POST {{host}}/clubs
+Content-Type: application/json
+
+{ "name": "Águias FC", "acronym": "AGU" }
+
+### 4. Comprar (valor 37, taxa 1,85, caixa 261,15)
+POST {{host}}/players/{{jogador.response.body.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{clube.response.body.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### 5. Consultar o clube
+GET {{host}}/clubs/{{clube.response.body.id}}
+
+### 6. Voltar a APTO
+PATCH {{host}}/players/{{jogador.response.body.id}}/condition
+Content-Type: application/json
+
+{ "condition": "APTO" }
+
+### 7. Vender
+POST {{host}}/players/{{jogador.response.body.id}}/sell
+
+### 8. Histórico (conferir: 300 + soma das variações = caixa)
+GET {{host}}/clubs/{{clube.response.body.id}}/transactions
+
+### 9. CSV
+GET {{host}}/clubs/{{clube.response.body.id}}/transactions/export
+
+### 10. Recompra recusada (409)
+POST {{host}}/players/{{jogador.response.body.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{clube.response.body.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### 11. Lista de clubes por patrimônio
+GET {{host}}/clubs?sort=net_worth_desc
+
+### 12. Lista de jogadores com filtros
+GET {{host}}/players?search=lua&sort=value_desc,age_asc&page=1&limit=10
+
+### 13. Venda de jogador livre (409) e id inválido (404)
+POST {{host}}/players/01/sell
+
+### 00. outras requisiçoes
+
+### 400: sigla que não bate com o nome
+POST {{host}}/clubs
+Content-Type: application/json
+
+{ "name": "Delta FC", "acronym": "XYZ" }
+
+### 409: nome repetido com outra caixa
+POST {{host}}/clubs
+Content-Type: application/json
+
+{ "name": "águias fc", "acronym": "AGU" }
+
+### 400: data de fidelidade sem fuso
+POST {{host}}/players/1/buy
+Content-Type: application/json
+
+{ "club_id": 1, "loyalty_until": "2027-03-02T10:15" }
+
+### 400: filtro inválido no histórico
+GET {{host}}/clubs/1/transactions?type=COMPRA,venda
