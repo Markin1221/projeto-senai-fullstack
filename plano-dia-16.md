@@ -6,26 +6,28 @@
 
 ## Bloco 0: Conferir o estado e ler a errata (~30 min)
 
-- [ ] **Errata do SENAI:** as respostas às dúvidas saem **hoje** (até sexta 16/10). Olhe o e-mail e a lista de issues em github.com/isi-tics/desafio-isi-dev-1/issues. A errata prevalece sobre o enunciado: se mudar alguma regra, anote aqui e ajuste o código.
-- [ ] Marcar no `claude/plano-dia-15.md` o que de fato ficou pronto. Rodar o fluxo `.http` (cadastrar jogador, criar clube, comprar, vender) contra o banco recriado do zero.
-- [ ] Se algo do dia 15 ficou pendente, a **ordem de prioridade** hoje é: (1) Compra e venda, (2) Histórico, (3) CSV, e só depois o Bloco 1 abaixo. Escalação e Partidas não funcionam sem Compra e Venda.
-- [ ] Confirmar que a venda e a mudança para `DOENTE` já removem o jogador de `escalacoes`. Se não, fazer agora (RN19.5).
+- [x] **Errata do SENAI:** as respostas às dúvidas saem **hoje** (até sexta 16/10). Olhe o e-mail e a lista de issues em github.com/isi-tics/desafio-isi-dev-1/issues. A errata prevalece sobre o enunciado: se mudar alguma regra, anote aqui e ajuste o código.
+- [x] Marcar no `claude/plano-dia-15.md` o que de fato ficou pronto. Rodar o fluxo `.http` (cadastrar jogador, criar clube, comprar, vender) contra o banco recriado do zero.
+- [x] Se algo do dia 15 ficou pendente, a **ordem de prioridade** hoje é: (1) Compra e venda, (2) Histórico, (3) CSV, e só depois o Bloco 1 abaixo. Escalação e Partidas não funcionam sem Compra e Venda.
+- [x] Confirmar que a venda e a mudança para `DOENTE` já removem o jogador de `escalacoes`. Se não, fazer agora (RN19.5).
 
 ## Bloco 1: Escalação (~1h15)
 
 ### 1.1 Regra pura, com testes (~30 min)
-- [ ] Função `posicoesFecham(formacao, posicoes[5])`: exatamente 1 GOL e, entre os 4 de linha, a quantidade de cada setor da formação (defesa = ZAG ou LAT, meio = MEI, ataque = ATA):
+
+- [x] Função `posicoesFecham(formacao, posicoes[5])`: exatamente 1 GOL e, entre os 4 de linha, a quantidade de cada setor da formação (defesa = ZAG ou LAT, meio = MEI, ataque = ATA):
 
 | `formation` | Defesa (ZAG/LAT) | Meio (MEI) | Ataque (ATA) |
-| --- | --- | --- | --- |
-| `3-1` | 3 | 0 | 1 |
-| `2-2` | 2 | 0 | 2 |
-| `2-1-1` | 2 | 1 | 1 |
-| `1-2-1` | 1 | 2 | 1 |
+| ----------- | ---------------- | ---------- | ------------ |
+| `3-1`       | 3                | 0          | 1            |
+| `2-2`       | 2                | 0          | 2            |
+| `2-1-1`     | 2                | 1          | 1            |
+| `1-2-1`     | 1                | 2          | 1            |
 
-- [ ] Testes: uma escalação válida por formação, e casos inválidos (2 goleiros, sem goleiro, 3 ATA no `2-2`, 2 MEI no `2-1-1`).
+- [x] Testes: uma escalação válida por formação, e casos inválidos (2 goleiros, sem goleiro, 3 ATA no `2-2`, 2 MEI no `2-1-1`).
 
 ### 1.2 Endpoints
+
 - [ ] `PUT /clubs/{id}/lineup` (200): corpo `formation` e `player_ids`.
   - **400:** `formation` ausente ou fora da lista; `player_ids` ausente, que não é lista, com tamanho diferente de 5, repetidos ou não inteiros positivos.
   - **404:** clube da URL ou algum jogador inexistente (inclusive excluído).
@@ -39,26 +41,28 @@
 ## Bloco 2: Partida (~2h)
 
 ### 2.1 Função pura da simulação, com testes (~1h)
+
 Uma função que recebe os 5 titulares de cada lado (já na ordem do elenco, com atributos e condição) e devolve placar, `result` e os 6 duelos. **Nada de banco aqui.**
 
 - [ ] Em cada time: goleiro e depois os 4 jogadores de linha numerados de 1 (o mais recuado) a 4 (o mais avançado), na ordem do elenco.
 - [ ] Condição: `MAL_CONDICIONADO` joga com cada atributo × 0,85, arredondado para o inteiro mais próximo com o meio para cima (74 → 63; 66 → 56; 50 → 43). `APTO` usa o valor do cadastro. Os atributos do jogador não mudam no banco.
 - [ ] Os 6 duelos (o `order` é o número do duelo):
 
-| Duelo | Quem ataca | Atacante | Defensor (do adversário) |
-| --- | --- | --- | --- |
-| 1 | mandante | 4º jogador de linha | goleiro |
-| 2 | mandante | 3º jogador de linha | 1º jogador de linha |
-| 3 | mandante | 2º jogador de linha | 2º jogador de linha |
-| 4 | visitante | 4º jogador de linha | goleiro |
-| 5 | visitante | 3º jogador de linha | 1º jogador de linha |
-| 6 | visitante | 2º jogador de linha | 2º jogador de linha |
+| Duelo | Quem ataca | Atacante            | Defensor (do adversário) |
+| ----- | ---------- | ------------------- | ------------------------ |
+| 1     | mandante   | 4º jogador de linha | goleiro                  |
+| 2     | mandante   | 3º jogador de linha | 1º jogador de linha      |
+| 3     | mandante   | 2º jogador de linha | 2º jogador de linha      |
+| 4     | visitante  | 4º jogador de linha | goleiro                  |
+| 5     | visitante  | 3º jogador de linha | 1º jogador de linha      |
+| 6     | visitante  | 2º jogador de linha | 2º jogador de linha      |
 
 - [ ] Atributo do atacante pela posição dele: ATA = `shooting`, MEI = `passing`, ZAG e LAT = `dribbling`. O defensor usa sempre `defending`, inclusive o goleiro. Já com o efeito da condição.
 - [ ] Gol quando ataque **maior** que defesa (empate de valores não é gol). Cada time faz de 0 a 3 gols. `result`: `MANDANTE`, `VISITANTE` ou `EMPATE`.
 - [ ] **Testes:** o exemplo completo do `README.md` (Águias FC × Delta FC, 1 × 2, `VISITANTE`, com os valores 63 e 56 do LAT mal condicionado) e um exemplo com cada uma das 4 formações.
 
 ### 2.2 `POST /matches` (~1h)
+
 - [ ] 201 com `Location: /api/v1/matches/{id}`.
 - [ ] **400:** corpo inválido, ids inválidos (0, negativo, não inteiro), `home_club_id` igual a `away_club_id`. **404:** clube inexistente. **409:** qualquer um dos dois sem escalação completa (5 titulares).
 - [ ] Gravar numa **única transação**: a partida (`jogada_em` = instante do servidor, placar, `formacao_mandante`, `formacao_visitante`) e os 6 registros em `duelos_partida`, com os **nomes, posições, condições, atributos e valores do momento** (nada é recalculado depois).
@@ -96,6 +100,7 @@ O frontend também precisa de commits distribuídos em dias diferentes (confira 
 ## Se atrasar
 
 Corte nesta ordem (do primeiro ao último a sacrificar):
+
 1. Bloco 5 inteiro vira sábado de manhã.
 2. README parcial vira segunda (19/10).
 3. Testes de integração do Bloco 1 viram o fluxo `.http` manual.

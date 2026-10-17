@@ -9,7 +9,7 @@ Repositório com `backend/` (NestJS, Prisma e PostgreSQL) e `frontend/` (React, 
 | Ferramenta              | Versão                                                |
 | ----------------------- | ----------------------------------------------------- |
 | Node.js (com npm)       | 22 LTS                                                |
-| Docker e Docker Compose | Docker Engine 24 ou superior, Compose v2              |
+| Docker e Docker Compose | Docker 29 (testado), Compose v2                       |
 | PostgreSQL              | 16 (imagem `postgres:16`, subida pelo Docker Compose) |
 
 Versões das principais dependências: NestJS 12, Prisma 6, TypeScript 6 e Jest 30. Os arquivos de trava (`backend/package-lock.json`) estão versionados.

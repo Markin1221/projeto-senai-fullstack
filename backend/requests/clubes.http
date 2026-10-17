@@ -1,0 +1,133 @@
+
+@baseUrl = http://localhost:3000/api/v1
+@clubId = 1
+
+### 1. Criar clube - esperado 201
+POST {{baseUrl}}/clubs
+Content-Type: application/json
+
+{
+  "name": "Tubarões FC",
+  "acronym": "TFC"
+}
+
+### 2. Listar clubes - esperado 200
+GET {{baseUrl}}/clubs
+Accept: application/json
+
+### 3. Listar clubes com ordenação - esperado 200 se o sort for válido
+GET {{baseUrl}}/clubs?sort=name
+Accept: application/json
+
+### 4. Buscar clube por ID - esperado 200
+GET {{baseUrl}}/clubs/{{clubId}}
+Accept: application/json
+
+### 5. Buscar clube inexistente - esperado 404
+GET {{baseUrl}}/clubs/999999
+Accept: application/json
+
+### 6. Criar clube com dados inválidos - esperado 400
+POST {{baseUrl}}/clubs
+Content-Type: application/json
+
+{
+  "name": "",
+  "acronym": "123"
+}
+
+### 7. Criar clube com nome duplicado - esperado 409
+POST {{baseUrl}}/clubs
+Content-Type: application/json
+
+{
+  "name": "Águias FC",
+  "acronym": "AGU"
+}
+
+### 8. Definir escalação 2-1-1 - esperado 200
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1",
+  "player_ids": [1, 2, 3, 4, 5]
+}
+
+### 9. Definir escalação 3-1 - esperado 200 se as posições forem compatíveis
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "3-1",
+  "player_ids": [1, 2, 3, 4, 5]
+}
+
+### 10. Formação inválida - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "4-0",
+  "player_ids": [1, 2, 3, 4, 5]
+}
+
+### 11. Formação ausente - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "player_ids": [1, 2, 3, 4, 5]
+}
+
+### 12. Lista de jogadores ausente - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1"
+}
+
+### 13. Menos de cinco jogadores - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1",
+  "player_ids": [1, 2, 3, 4]
+}
+
+### 14. IDs repetidos - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1",
+  "player_ids": [1, 2, 3, 4, 4]
+}
+
+### 15. ID não inteiro positivo - esperado 400
+PUT {{baseUrl}}/clubs/{{clubId}}/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1",
+  "player_ids": [1, 2, 3, 4, 0]
+}
+
+### 16. Clube inexistente - esperado 404
+PUT {{baseUrl}}/clubs/999999/lineup
+Content-Type: application/json
+
+{
+  "formation": "2-1-1",
+  "player_ids": [1, 2, 3, 4, 5]
+}
+
+### 17. Consultar escalação - esperado 200
+GET {{baseUrl}}/clubs/{{clubId}}/lineup
+Accept: application/json
+
+### 18. Consultar escalação de clube inexistente - esperado 404
+GET {{baseUrl}}/clubs/999999/lineup
+Accept: application/json
