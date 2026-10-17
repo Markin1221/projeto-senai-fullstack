@@ -1633,6 +1633,45 @@ async function main() {
       ],
     },
   );
+  secao('B09 limite de 20 clubes');
+  const nomesLimite = [
+    'Aurora',
+    'Bravos',
+    'Cedro',
+    'Dunas',
+    'Estrela',
+    'Fênix',
+    'Garças',
+    'Hércules',
+    'Icaros',
+    'Jaguar',
+    'Kiwi',
+    'Lunar',
+    'Mares',
+    'Nortes',
+    'Ondas',
+    'Pampas',
+    'Quasar',
+    'Rubis',
+    'Sabiás',
+    'Tigres',
+  ];
+  const jaExistem = lista((await chamar('GET', '/clubs')).json).length;
+  for (const n of nomesLimite.slice(0, Math.max(0, 20 - jaExistem))) {
+    await exigir(
+      'POST',
+      '/clubs',
+      { name: `${n} FC`, acronym: sa(n).slice(0, 3).toUpperCase() },
+      201,
+    );
+  }
+  await teste(
+    'B09 21º clube (limite de 20)',
+    'POST',
+    '/clubs',
+    { name: 'Zeta FC', acronym: 'ZET' },
+    409,
+  );
 
   // ---------------- Conciliação ----------------
   secao('Conciliação do caixa (300 + soma das variações = caixa)');
