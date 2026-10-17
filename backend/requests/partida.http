@@ -1,0 +1,24 @@
+### 400: mesmo clube
+@base = http://localhost:3000/api/v1
+POST {{base}}/matches
+Content-Type: application/json
+
+{ "home_club_id": 1, "away_club_id": 1 }
+
+### 404
+POST {{base}}/matches
+Content-Type: application/json
+
+{ "home_club_id": 1, "away_club_id": 9999 }
+
+### 409: clube sem escalação completa
+POST {{base}}/matches
+Content-Type: application/json
+
+{ "home_club_id": 1, "away_club_id": 2 }
+
+### 201 com Location (os 2 clubes escalados)
+POST {{base}}/matches
+Content-Type: application/json
+
+{ "home_club_id": 1, "away_club_id": 2 }

@@ -7,6 +7,7 @@ import { JogadoresModule } from './jogadores/jogadores.module';
 import { MercadoModule } from './mercado/mercado.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { EscalacaoModule } from './escalacao/escalacao.module';
+import { PartidasModule } from './partidas/partidas.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EscalacaoModule } from './escalacao/escalacao.module';
     MercadoModule,
     HistoricoModule,
     EscalacaoModule,
+    PartidasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
