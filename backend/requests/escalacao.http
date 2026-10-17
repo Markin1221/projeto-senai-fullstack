@@ -1,0 +1,28 @@
+@base = http://localhost:3000/api/v1
+
+### sem escalação: formation null, complete false
+GET {{base}}/clubs/1/lineup
+
+### escalar (200)
+PUT {{base}}/clubs/1/lineup
+Content-Type: application/json
+
+{ "formation": "2-2", "player_ids": [1, 2, 3, 4, 5] }
+
+### 400: repetidos
+PUT {{base}}/clubs/1/lineup
+Content-Type: application/json
+
+{ "formation": "2-2", "player_ids": [1, 1, 3, 4, 5] }
+
+### 404: jogador inexistente
+PUT {{base}}/clubs/1/lineup
+Content-Type: application/json
+
+{ "formation": "2-2", "player_ids": [1, 2, 3, 4, 9999] }
+
+### 409: formação que não fecha (troque a formação)
+PUT {{base}}/clubs/1/lineup
+Content-Type: application/json
+
+{ "formation": "1-2-1", "player_ids": [1, 2, 3, 4, 5] }

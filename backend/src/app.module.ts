@@ -6,6 +6,7 @@ import { HistoricoModule } from './historico/dto/historico.module';
 import { JogadoresModule } from './jogadores/jogadores.module';
 import { MercadoModule } from './mercado/mercado.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { EscalacaoModule } from './escalacao/escalacao.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PrismaModule } from './prisma/prisma.module';
     ClubesModule,
     MercadoModule,
     HistoricoModule,
+    EscalacaoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

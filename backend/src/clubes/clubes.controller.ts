@@ -13,7 +13,7 @@ import { IdPipe } from '../common/pipes/id.pipe';
 import { ClubesService } from './clubes.service';
 import { CriarClubeDto } from './dto/criar-clube.dto';
 import { ListarClubesQuery } from './dto/listar-clubes.query';
-import { DefinirEscalacaoDto } from './dto/definir-escalacao.dto';
+import { DefinirEscalacaoDto } from '../escalacao/dto/definir-escalacao.dto';
 
 @Controller('clubs')
 export class ClubesController {
@@ -37,16 +37,5 @@ export class ClubesController {
   @Get(':id')
   buscarPorId(@Param('id', IdPipe) id: number) {
     return this.clubesService.buscarPorId(id);
-  }
-  @Put(':id/lineup')
-  definirEscalacao(
-    @Param('id', IdPipe) id: number,
-    @Body() dto: DefinirEscalacaoDto,
-  ) {
-    return this.clubesService.definirEscalacao(
-      id,
-      dto.formation,
-      dto.player_ids,
-    );
   }
 }
