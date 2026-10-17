@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
@@ -27,8 +28,23 @@ export class PartidasController {
     return partida;
   }
 
+  @Get()
+  listar(@Query('club_id') clubId?: string) {
+    return this.service.listar(clubId);
+  }
+
   @Get(':id')
   buscar(@Param('id', IdPipe) id: number) {
     return this.service.buscarPorId(id);
+  }
+}
+
+@Controller('standings')
+export class ClassificacaoController {
+  constructor(private readonly service: PartidasService) {}
+
+  @Get()
+  buscar() {
+    return this.service.classificacao();
   }
 }

@@ -11,6 +11,7 @@ import { posicoesFecham } from '../regras/regras';
 import { simularPartida, Titular } from '../regras/partida';
 import { CriarPartidaDto } from './dto/criar-partida.dto';
 import { montarPartida } from './partida.mapper';
+import { calcularClassificacao } from '../regras/classificacao';
 
 type ClubeLinha = { id: number; nome: string; formacao: string | null };
 
@@ -94,6 +95,58 @@ export class PartidasService {
     });
     const nome = (cid: number) => clubes.find((c) => c.id === cid)!.nome;
     return montarPartida(p, nome(p.mandante_id), nome(p.visitante_id), duelos);
+  }
+  async listar(clubIdBruto?: unknown) {
+    let clubId: number | undefined;
+    if (clubIdBruto !== undefined) {
+      if (
+        typeof clubIdBruto !== 'string' ||
+        !/^[1-9]\d*$/.test(clubIdBruto) ||
+        Number(clubIdBruto) > 2147483647
+      ) {
+        throw new BadRequestException('club_id deve ser um inteiro positivo.');
+      }
+      clubId = Number(clubIdBruto);
+      const existe = await this.prisma.clubes.findUnique({
+        where: { id: clubId },
+      });
+      if (!existe) throw new NotFoundException('Clube não encontrado.');
+    }
+
+    const partidas = await this.prisma.partidas.findMany({
+      where: clubId
+        ? { OR: [{ mandante_id: clubId }, { visitante_id: clubId }] }
+        : undefined,
+      orderBy: [{ jogada_em: 'desc' }, { id: 'desc' }],
+    });
+
+    const ids = [
+      ...new Set(partidas.flatMap((p) => [p.mandante_id, p.visitante_id])),
+    ];
+    const clubes = await this.prisma.clubes.findMany({
+      where: { id: { in: ids } },
+    });
+    const nome = (cid: number) => clubes.find((c) => c.id === cid)!.nome;
+
+    return partidas.map((p) =>
+      montarPartida(p, nome(p.mandante_id), nome(p.visitante_id)),
+    );
+  }
+
+  async classificacao() {
+    const [clubes, partidas] = await Promise.all([
+      this.prisma.clubes.findMany(),
+      this.prisma.partidas.findMany(),
+    ]);
+    return calcularClassificacao(
+      clubes.map((c) => ({ id: c.id, nome: c.nome })),
+      partidas.map((p) => ({
+        mandanteId: p.mandante_id,
+        visitanteId: p.visitante_id,
+        golsMandante: p.gols_mandante,
+        golsVisitante: p.gols_visitante,
+      })),
+    );
   }
 
   private async titulares(

@@ -1,0 +1,571 @@
+@base = http://localhost:3000/api/v1
+
+###############################################################
+# SETUP: jogadores e clubes usados nos testes seguintes
+###############################################################
+
+# @name pMeia
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Meia Lua", "position": "MEI", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+# esperado: 201 + Location, base_value 40.00, overall 75, condition APTO, club_id null
+
+###
+# @name pVet
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Veterano", "position": "MEI", "agility": 10, "age": 40, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+###
+# @name pJovem
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Jovem Lua", "position": "MEI", "agility": 85, "age": 19, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+# esperado: base_value 44.40 (40 x 1,11), market_value 48.84 (+10% jovem)
+
+###
+# @name pDoente
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Doente Teste", "position": "ZAG", "agility": 50, "age": 25, "pace": 60, "shooting": 40, "passing": 60, "dribbling": 50, "defending": 75, "physical": 70, "potential": 80 }
+
+###
+# @name pDel
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Para Excluir", "position": "ATA", "agility": 60, "age": 25, "pace": 60, "shooting": 60, "passing": 60, "dribbling": 60, "defending": 40, "physical": 60, "potential": 70 }
+
+###
+# @name cA
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Atlas FC", "acronym": "ATL" }
+
+###
+# @name cB
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Vulcão FC", "acronym": "VUL" }
+
+###############################################################
+# B01: validação do cadastro (tudo deve dar 400)
+###############################################################
+
+### corpo que é array
+POST {{base}}/players
+Content-Type: application/json
+
+[]
+
+### agility como texto
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "X Teste", "position": "MEI", "agility": "85", "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### nome só com espaços
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "     ", "position": "MEI", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### nome curto (min 3)
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Ab", "position": "MEI", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### position minúscula
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Pos Errada", "position": "mei", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### campo ausente (sem agility)
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Sem Agilidade", "position": "MEI", "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### campo null
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Campo Nulo", "position": "MEI", "agility": null, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### nome de campo errado (Agility)
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Chave Errada", "position": "MEI", "Agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### agility 0 e 101
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Agil Zero", "position": "MEI", "agility": 0, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+###
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Agil Cem Um", "position": "MEI", "agility": 101, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### idade 15 e 46
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Idade Quinze", "position": "MEI", "agility": 85, "age": 15, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+###
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Idade Quarenta Seis", "position": "MEI", "agility": 85, "age": 46, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+### atributo 0 e 100
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Atributo Zero", "position": "MEI", "agility": 85, "age": 25, "pace": 0, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86 }
+
+###
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Atributo Cem", "position": "MEI", "agility": 85, "age": 25, "pace": 100, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 99 }
+
+### potential menor que o maior atributo (passing 82, potential 80)
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Potencial Baixo", "position": "MEI", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 80 }
+
+# Regras que cruzam campos além do potential: confira "Limites de cada campo" no README.md e teste.
+
+###############################################################
+# B02: códigos de erro e convenções
+###############################################################
+
+### JSON quebrado: 400 com message
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "quebrado",
+
+### 404: id não numérico, com zero à esquerda, rota inexistente, id inexistente
+GET {{base}}/players/abc
+
+###
+GET {{base}}/players/01
+
+###
+GET {{base}}/players/0
+
+###
+GET {{base}}/inexistente
+
+###
+GET {{base}}/players/999999
+
+###############################################################
+# B03: campos do sistema ignorados, Location, base_value fixo
+###############################################################
+
+### esperado: 201, condition APTO, club_id null, base_value 40.00 (ignora o que veio)
+# @name pExtra
+POST {{base}}/players
+Content-Type: application/json
+
+{ "name": "Campos Extras", "position": "MEI", "agility": 85, "age": 25, "pace": 70, "shooting": 68, "passing": 82, "dribbling": 79, "defending": 55, "physical": 64, "potential": 86, "base_value": 999, "market_value": 999, "overall": 99, "condition": "DOENTE", "club_id": 1, "id": 777 }
+
+### PUT não muda base_value (continua 40.00; overall pode mudar com a posição)
+PUT {{base}}/players/{{pExtra.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Campos Extras Editado", "position": "ATA", "agility": 90, "age": 30 }
+
+###
+GET {{base}}/players/{{pExtra.response.body.$.id}}
+
+###############################################################
+# B04: PUT e PATCH
+###############################################################
+
+### PUT inválido (sem position): 400
+PUT {{base}}/players/{{pExtra.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Sem Posicao", "agility": 90, "age": 30 }
+
+### idade menor que a atual (30 -> 29): 409
+PUT {{base}}/players/{{pExtra.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Campos Extras Editado", "position": "ATA", "agility": 90, "age": 29 }
+
+### PATCH condition ausente / inválida: 400
+PATCH {{base}}/players/{{pDoente.response.body.$.id}}/condition
+Content-Type: application/json
+
+{}
+
+###
+PATCH {{base}}/players/{{pDoente.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "doente" }
+
+### vai para DOENTE: 200
+PATCH {{base}}/players/{{pDoente.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "DOENTE" }
+
+### DOENTE direto para APTO: 409
+PATCH {{base}}/players/{{pDoente.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "APTO" }
+
+### DOENTE -> MAL_CONDICIONADO: 200, e mesma condição de novo: 200
+PATCH {{base}}/players/{{pDoente.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "MAL_CONDICIONADO" }
+
+###############################################################
+# B05 e B06: valor de mercado, overall, valor base
+###############################################################
+
+### Meia Lua MAL_CONDICIONADO, agilidade 85, idade 25: market_value 37.00
+PATCH {{base}}/players/{{pMeia.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "MAL_CONDICIONADO" }
+
+### Veterano (age 40, agilidade 10) DOENTE: -30%-10pp = -40%, idade -10% -> teto -40%: market_value 24.00
+PATCH {{base}}/players/{{pVet.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "DOENTE" }
+
+### Jovem Lua APTO: base 44.40, market 48.84
+GET {{base}}/players/{{pJovem.response.body.$.id}}
+
+###############################################################
+# B07: listagem
+###############################################################
+
+### paginação e meta
+GET {{base}}/players?page=1&limit=3
+
+### página além da última: 200 com data []
+GET {{base}}/players?page=999&limit=10
+
+### busca sem acento e sem diferenciar maiúscula
+GET {{base}}/players?search=LUA
+
+###
+GET {{base}}/players?search=veteráno
+
+### filtros combinados
+GET {{base}}/players?position=MEI&condition=APTO&free=true&min_age=18&max_age=30&min_value=10&max_value=100
+
+### ordenações (ajuste o nome se o seu sort usa outro)
+GET {{base}}/players?sort=value_desc
+
+###
+GET {{base}}/players?sort=value_asc
+
+###
+GET {{base}}/players?sort=age_desc
+
+###
+GET {{base}}/players?sort=name
+
+###
+GET {{base}}/players?sort=position
+
+### sort com 2 critérios (o formato é o do README.md, seção de query params)
+GET {{base}}/players?sort=position,value_desc
+
+### inválidos: 400
+GET {{base}}/players?sort=xyz
+
+###
+GET {{base}}/players?page=0
+
+###
+GET {{base}}/players?limit=1000
+
+###
+GET {{base}}/players?min_age=40&max_age=20
+
+###
+GET {{base}}/players?free=true&club_id=1
+
+###
+GET {{base}}/players?position=mei
+
+###############################################################
+# B08: exclusão lógica
+###############################################################
+
+### 204 sem corpo
+DELETE {{base}}/players/{{pDel.response.body.$.id}}
+
+### depois, tudo 404
+GET {{base}}/players/{{pDel.response.body.$.id}}
+
+###
+PUT {{base}}/players/{{pDel.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Para Excluir", "position": "ATA", "agility": 60, "age": 25 }
+
+###
+PATCH {{base}}/players/{{pDel.response.body.$.id}}/condition
+Content-Type: application/json
+
+{ "condition": "APTO" }
+
+###
+DELETE {{base}}/players/{{pDel.response.body.$.id}}
+
+### não aparece na lista
+GET {{base}}/players?search=excluir
+
+###############################################################
+# B09: clubes
+###############################################################
+
+### esperado nos setups: 201 + Location, cash 300.00
+GET {{base}}/clubs/{{cA.response.body.$.id}}
+
+### nome repetido: 409
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Atlas FC", "acronym": "ATL" }
+
+### nome repetido em minúsculas: 409 (sigla trocada para isolar o nome; se der 400, a sigla não bate com o nome)
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "atlas fc", "acronym": "ATA" }
+
+### sigla repetida: 409
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Atlante FC", "acronym": "ATL" }
+
+### inválidos: 400
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Ab", "acronym": "ABC" }
+
+###
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Sigla Curta FC", "acronym": "SC" }
+
+###
+POST {{base}}/clubs
+Content-Type: application/json
+
+{ "name": "Sigla Minus FC", "acronym": "sig" }
+
+### lista ordenada por nome
+GET {{base}}/clubs
+
+# Limite de 20 clubes (409 no 21º): teste criando clubes pelo script, ou confira no código.
+
+###############################################################
+# B10 a B13: compra
+###############################################################
+
+### compra OK: 200, value 37.00, fee 1.85, club_cash 261.15, contrato ATIVO
+POST {{base}}/players/{{pMeia.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### jogador que já tem clube: 409 (outro clube tentando)
+POST {{base}}/players/{{pMeia.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cB.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### jogador excluído: 404
+POST {{base}}/players/{{pDel.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cB.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### club_id inexistente: 404
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": 999999, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### club_id inválido: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": "abc", "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### loyalty_until ausente: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}} }
+
+### formato sem -03:00: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15" }
+
+### com Z em vez de -03:00: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15Z" }
+
+### data no passado: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2020-01-01T10:00-03:00" }
+
+### mais de 1.095 dias: 400
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2030-12-31T10:15-03:00" }
+
+### segunda compra (Jovem Lua, 48.84 + taxa 2.44): 200
+POST {{base}}/players/{{pJovem.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2026-12-20T10:00-03:00" }
+
+### clube com elenco: caixa, squad_value, net_worth, elenco na ordem, contrato
+GET {{base}}/clubs/{{cA.response.body.$.id}}
+
+# Limite de 50% do caixa e de 12 jogadores: precisa de mais jogadores caros / 12 compras (veja o fim do arquivo).
+
+###############################################################
+# B14 a B16: venda
+###############################################################
+
+### vende o Meia Lua: 200 (multa, lucro, comissão, club_cash)
+POST {{base}}/players/{{pMeia.response.body.$.id}}/sell
+
+### venda de novo (já livre): 409
+POST {{base}}/players/{{pMeia.response.body.$.id}}/sell
+
+### venda de jogador excluído: 404
+POST {{base}}/players/{{pDel.response.body.$.id}}/sell
+
+### volta para os livres
+GET {{base}}/players?free=true&search=meia
+
+### recompra pelo mesmo clube: 409
+POST {{base}}/players/{{pMeia.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cA.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+### outro clube compra: 200
+POST {{base}}/players/{{pMeia.response.body.$.id}}/buy
+Content-Type: application/json
+
+{ "club_id": {{cB.response.body.$.id}}, "loyalty_until": "2027-03-02T10:15-03:00" }
+
+###############################################################
+# B17: clubes com elenco
+###############################################################
+
+### sort inválido: 400
+GET {{base}}/clubs?sort=xyz
+
+### ordenação por patrimônio (ajuste o nome do sort se for outro)
+GET {{base}}/clubs?sort=net_worth_desc
+
+### jogadores por clube e com clube
+GET {{base}}/players?club_id={{cB.response.body.$.id}}
+
+###
+GET {{base}}/players?free=false
+
+### excluir jogador com clube: 409
+DELETE {{base}}/players/{{pMeia.response.body.$.id}}
+
+### mudar posição de jogador com clube: 409
+PUT {{base}}/players/{{pMeia.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Meia Lua", "position": "ATA", "agility": 85, "age": 25 }
+
+###############################################################
+# B18 e B19: histórico e CSV (clube Atlas: compra, venda, compra)
+###############################################################
+
+### histórico completo com summary
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions
+
+### filtros
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?type=VENDA
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?player_id={{pMeia.response.body.$.id}}
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?type=COMPRA&player_id={{pMeia.response.body.$.id}}
+
+### erros: type inválido 400, player_id inválido 400, jogador excluído 404, clube inexistente 404
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?type=xyz
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?player_id=abc
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions?player_id={{pDel.response.body.$.id}}
+
+###
+GET {{base}}/clubs/999999/transactions
+
+### o nome do jogador no histórico não muda depois de editar o jogador
+PUT {{base}}/players/{{pJovem.response.body.$.id}}
+Content-Type: application/json
+
+{ "name": "Jovem Lua Renomeado", "position": "MEI", "agility": 85, "age": 19 }
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions
+
+### CSV: text/csv, UTF-8 sem BOM, LF, ";" e vírgula decimal
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions/export
+
+###
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions/export?type=VENDA
+
+### erro do CSV é JSON: 400
+GET {{base}}/clubs/{{cA.response.body.$.id}}/transactions/export?type=xyz
+
+###
+GET {{base}}/clubs/999999/transactions/export
+
+# Conciliação do caixa: 300 + soma de cash_change de todas as transações deve ser igual ao cash do clube.

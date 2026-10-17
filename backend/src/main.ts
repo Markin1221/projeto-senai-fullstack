@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { CorpoObjetoGuard } from './common/guards/corpo-objeto.guard';
 import { requestLogger } from './common/middleware/request-logger.middleware';
+import { ValidacaoPipe } from './common/pipes/validacao.pipe';
 
 async function bootstrap() {
   const origens = (process.env.CORS_ORIGIN ?? '')
@@ -21,7 +21,7 @@ async function bootstrap() {
   app.use(requestLogger);
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalGuards(new CorpoObjetoGuard(app.get(Reflector)));
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidacaoPipe({ whitelist: true, transform: true }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

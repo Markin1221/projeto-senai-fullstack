@@ -21,4 +21,33 @@ Content-Type: application/json
 POST {{base}}/matches
 Content-Type: application/json
 
-{ "home_club_id": 1, "away_club_id": 2 }
+{ "home_club_id": 3, "away_club_id": 4 }
+
+
+
+### lista (mais recente primeiro, sem duels)
+GET {{base}}/matches
+
+### filtro por clube
+GET {{base}}/matches?club_id=4
+
+### 400: club_id inválido
+GET {{base}}/matches?club_id=abc
+
+### 400: club_id repetido
+GET {{base}}/matches?club_id=3&club_id=4
+
+### 404: clube inexistente
+GET {{base}}/matches?club_id=9999
+
+### partida com 6 duelos
+GET {{base}}/matches/1
+
+### 404 e id inválido
+GET {{base}}/matches/9999
+
+###
+GET {{base}}/matches/01
+
+### classificação (todos os clubes, inclusive zerados)
+GET {{base}}/standings
