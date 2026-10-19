@@ -69,3 +69,7 @@ export interface NovoJogador extends EdicaoJogador {
   physical: number;
   potential: number;
 }
+export interface NovoClube {
+  name: string;
+  acronym: string;
+}

@@ -6,6 +6,7 @@ import type {
   LinhaClassificacao,
   NovoJogador,
   Pagina,
+  NovoClube,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -110,3 +111,5 @@ export const alterarCondicao = (id: number, condicao: Condicao) =>
   api.patch<Jogador>(`/players/${id}/condition`, { condition: condicao });
 export const excluirJogador = (id: number) =>
   api.delete<void>(`/players/${id}`);
+export const criarClube = (corpo: NovoClube) =>
+  api.post<Clube>("/clubs", corpo);
