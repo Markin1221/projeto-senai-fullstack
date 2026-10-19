@@ -3,13 +3,19 @@
 import { useCallback, useMemo, useState } from "react";
 import { CampoFormulario } from "@/components/campo-formulario";
 import { CampoSelect, type OpcaoSelect } from "@/components/campo-select";
+import { DialogoConfirmacao } from "@/components/dialogo-confirmacao";
+import { FormularioCondicao } from "@/components/formulario-condicao";
+import { FormularioJogador } from "@/components/formulario-jogador";
+import { Modal } from "@/components/modal";
 import { Paginacao } from "@/components/paginacao";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDados } from "@/hooks/use-dados";
 import { useDebounce } from "@/hooks/use-debounce";
-import { listarClubes, listarJogadores } from "@/lib/api";
+import { useEnvio } from "@/hooks/use-envio";
+import { excluirJogador, listarClubes, listarJogadores } from "@/lib/api";
+import { avisarErro, avisarSucesso } from "@/lib/avisos";
 import {
   FILTROS_INICIAIS,
   OPCOES_CONDICAO,
@@ -24,7 +30,16 @@ import type { Jogador } from "@/lib/tipos";
 
 const carregarClubes = () => listarClubes();
 
-function criarColunas(nomesDosClubes: Map<number, string>): Coluna<Jogador>[] {
+interface Acoes {
+  editar: (jogador: Jogador) => void;
+  condicao: (jogador: Jogador) => void;
+  excluir: (jogador: Jogador) => void;
+}
+
+function criarColunas(
+  nomesDosClubes: Map<number, string>,
+  acoes: Acoes,
+): Coluna<Jogador>[] {
   return [
     { titulo: "Nome", celula: (j) => j.name },
     { titulo: "Posição", celula: (j) => j.position },
@@ -56,12 +71,38 @@ function criarColunas(nomesDosClubes: Map<number, string>): Coluna<Jogador>[] {
           ? "Livre"
           : (nomesDosClubes.get(j.club_id) ?? `#${j.club_id}`),
     },
+    {
+      titulo: "Ações",
+      celula: (j) => (
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" onClick={() => acoes.editar(j)}>
+            Editar
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => acoes.condicao(j)}>
+            Condição
+          </Button>
+          {j.club_id === null && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => acoes.excluir(j)}
+            >
+              Excluir
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 }
 
 export default function PaginaJogadores() {
   const [filtros, setFiltros] = useState<FiltrosJogadores>(FILTROS_INICIAIS);
   const [pagina, setPagina] = useState(1);
+  const [cadastro, setCadastro] = useState<{ jogador?: Jogador } | null>(null);
+  const [condicaoDe, setCondicaoDe] = useState<Jogador | null>(null);
+  const [paraExcluir, setParaExcluir] = useState<Jogador | null>(null);
+  const { enviando: excluindo, executar: executarExclusao } = useEnvio();
 
   const pedido = useMemo(() => ({ filtros, pagina }), [filtros, pagina]);
   const pedidoAtrasado = useDebounce(pedido, 300);
@@ -80,7 +121,18 @@ export default function PaginaJogadores() {
     () => new Map((clubes ?? []).map((c) => [c.id, c.name])),
     [clubes],
   );
-  const colunas = useMemo(() => criarColunas(nomesDosClubes), [nomesDosClubes]);
+  const acoes = useMemo<Acoes>(
+    () => ({
+      editar: (jogador) => setCadastro({ jogador }),
+      condicao: setCondicaoDe,
+      excluir: setParaExcluir,
+    }),
+    [],
+  );
+  const colunas = useMemo(
+    () => criarColunas(nomesDosClubes, acoes),
+    [nomesDosClubes, acoes],
+  );
   const opcoesClube = useMemo<OpcaoSelect[]>(
     () => [
       { valor: "", rotulo: "Todos os clubes" },
@@ -95,9 +147,29 @@ export default function PaginaJogadores() {
   };
   const apenasLivres = filtros.situacao === "livres";
 
+  const confirmarExclusao = async () => {
+    if (!paraExcluir) return;
+    const alvo = paraExcluir;
+    try {
+      const feito = await executarExclusao(() =>
+        excluirJogador(alvo.id).then(() => true),
+      );
+      if (!feito) return;
+      avisarSucesso("Jogador excluído.", alvo.name);
+      if (dados?.data.length === 1 && pagina > 1) setPagina(pagina - 1);
+      else recarregar();
+    } catch (erroExclusao) {
+      avisarErro(erroExclusao);
+    }
+    setParaExcluir(null);
+  };
+
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Jogadores</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Jogadores</h1>
+        <Button onClick={() => setCadastro({})}>Novo jogador</Button>
+      </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <CampoFormulario
@@ -193,6 +265,42 @@ export default function PaginaJogadores() {
           aoMudar={setPagina}
         />
       )}
+
+      <Modal
+        aberto={cadastro !== null}
+        titulo={cadastro?.jogador ? "Editar jogador" : "Novo jogador"}
+        aoFechar={() => setCadastro(null)}
+      >
+        <FormularioJogador
+          jogador={cadastro?.jogador}
+          aoSalvar={recarregar}
+          aoFechar={() => setCadastro(null)}
+        />
+      </Modal>
+
+      <Modal
+        aberto={condicaoDe !== null}
+        titulo="Alterar condição"
+        aoFechar={() => setCondicaoDe(null)}
+      >
+        {condicaoDe && (
+          <FormularioCondicao
+            jogador={condicaoDe}
+            aoSalvar={recarregar}
+            aoFechar={() => setCondicaoDe(null)}
+          />
+        )}
+      </Modal>
+
+      <DialogoConfirmacao
+        aberto={paraExcluir !== null}
+        titulo="Excluir jogador"
+        mensagem={`Excluir ${paraExcluir?.name ?? "o jogador"}? Essa ação não pode ser desfeita.`}
+        rotuloConfirmar="Excluir"
+        enviando={excluindo}
+        aoConfirmar={confirmarExclusao}
+        aoCancelar={() => setParaExcluir(null)}
+      />
     </section>
   );
 }

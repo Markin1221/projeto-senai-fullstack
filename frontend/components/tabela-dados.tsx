@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { AlertaErro } from "@/components/alerta-erro";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -38,19 +38,7 @@ export function TabelaDados<T>({
   aoTentarDeNovo,
 }: Props<T>) {
   if (erro) {
-    return (
-      <div
-        role="alert"
-        className="flex items-center justify-between gap-4 rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
-      >
-        <span>{erro}</span>
-        {aoTentarDeNovo && (
-          <Button variant="outline" size="sm" onClick={aoTentarDeNovo}>
-            Tentar de novo
-          </Button>
-        )}
-      </div>
-    );
+    return <AlertaErro mensagem={erro} aoTentarDeNovo={aoTentarDeNovo} />;
   }
 
   return (

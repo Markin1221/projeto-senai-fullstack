@@ -1,4 +1,12 @@
-import type { Clube, Jogador, LinhaClassificacao, Pagina } from "@/lib/tipos";
+import type {
+  Clube,
+  Condicao,
+  EdicaoJogador,
+  Jogador,
+  LinhaClassificacao,
+  NovoJogador,
+  Pagina,
+} from "@/lib/tipos";
 
 const BASE = "/api/v1";
 const MENSAGEM_REDE = "Não foi possível falar com o servidor. Tente de novo.";
@@ -94,3 +102,11 @@ export const buscarClassificacao = () =>
   api.get<LinhaClassificacao[]>("/standings");
 export const urlCsvDoClube = (clubeId: number, consulta?: Consulta) =>
   montarUrl(`/clubs/${clubeId}/transactions/export`, consulta);
+export const cadastrarJogador = (corpo: NovoJogador) =>
+  api.post<Jogador>("/players", corpo);
+export const editarJogador = (id: number, corpo: EdicaoJogador) =>
+  api.put<Jogador>(`/players/${id}`, corpo);
+export const alterarCondicao = (id: number, condicao: Condicao) =>
+  api.patch<Jogador>(`/players/${id}/condition`, { condition: condicao });
+export const excluirJogador = (id: number) =>
+  api.delete<void>(`/players/${id}`);

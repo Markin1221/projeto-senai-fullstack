@@ -53,3 +53,19 @@ export interface LinhaClassificacao {
   goal_difference: number;
   points: number;
 }
+export interface EdicaoJogador {
+  name: string;
+  position: Posicao;
+  agility: number;
+  age: number;
+}
+
+export interface NovoJogador extends EdicaoJogador {
+  pace: number;
+  shooting: number;
+  passing: number;
+  dribbling: number;
+  defending: number;
+  physical: number;
+  potential: number;
+}
