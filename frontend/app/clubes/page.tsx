@@ -10,6 +10,7 @@ import { useDados } from "@/hooks/use-dados";
 import { listarClubes } from "@/lib/api";
 import { formatarMoeda } from "@/lib/formatar";
 import type { Clube } from "@/lib/tipos";
+import Link from "next/link";
 
 const OPCOES_ORDEM_CLUBES: OpcaoSelect[] = [
   { valor: "name", rotulo: "Nome" },
@@ -18,7 +19,17 @@ const OPCOES_ORDEM_CLUBES: OpcaoSelect[] = [
 ];
 
 const COLUNAS: Coluna<Clube>[] = [
-  { titulo: "Clube", celula: (c) => c.name },
+  {
+    titulo: "Clube",
+    celula: (c) => (
+      <Link
+        href={`/clubes/${c.id}`}
+        className="font-medium underline-offset-4 hover:underline"
+      >
+        {c.name}
+      </Link>
+    ),
+  },
   { titulo: "Sigla", celula: (c) => c.acronym },
   { titulo: "Caixa", celula: (c) => formatarMoeda(c.cash), numerica: true },
   {

@@ -73,3 +73,17 @@ export interface NovoClube {
   name: string;
   acronym: string;
 }
+export interface Contrato {
+  purchase_value: number;
+  loyalty_until: string;
+  remaining_days: number;
+  penalty_rate: number;
+}
+
+export interface JogadorDoElenco extends Jogador {
+  contract: Contrato;
+}
+
+export interface ClubeDetalhado extends Clube {
+  players: JogadorDoElenco[];
+}

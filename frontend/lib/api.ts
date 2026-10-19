@@ -7,6 +7,7 @@ import type {
   NovoJogador,
   Pagina,
   NovoClube,
+  ClubeDetalhado,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -113,3 +114,5 @@ export const excluirJogador = (id: number) =>
   api.delete<void>(`/players/${id}`);
 export const criarClube = (corpo: NovoClube) =>
   api.post<Clube>("/clubs", corpo);
+export const buscarClube = (id: string) =>
+  api.get<ClubeDetalhado>(`/clubs/${encodeURIComponent(id)}`);
