@@ -27,6 +27,7 @@ import {
 } from "@/lib/filtros-jogadores";
 import { formatarMoeda, rotuloCondicao } from "@/lib/formatar";
 import type { Jogador } from "@/lib/tipos";
+import { FormularioCompra } from "@/components/formulario-compra";
 
 const carregarClubes = () => listarClubes();
 
@@ -34,6 +35,7 @@ interface Acoes {
   editar: (jogador: Jogador) => void;
   condicao: (jogador: Jogador) => void;
   excluir: (jogador: Jogador) => void;
+  comprar: (jogador: Jogador) => void;
 }
 
 function criarColunas(
@@ -82,13 +84,18 @@ function criarColunas(
             Condição
           </Button>
           {j.club_id === null && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => acoes.excluir(j)}
-            >
-              Excluir
-            </Button>
+            <>
+              <Button size="sm" onClick={() => acoes.comprar(j)}>
+                Comprar
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => acoes.excluir(j)}
+              >
+                Excluir
+              </Button>
+            </>
           )}
         </div>
       ),
@@ -102,6 +109,7 @@ export default function PaginaJogadores() {
   const [cadastro, setCadastro] = useState<{ jogador?: Jogador } | null>(null);
   const [condicaoDe, setCondicaoDe] = useState<Jogador | null>(null);
   const [paraExcluir, setParaExcluir] = useState<Jogador | null>(null);
+  const [comprarDe, setComprarDe] = useState<Jogador | null>(null);
   const { enviando: excluindo, executar: executarExclusao } = useEnvio();
 
   const pedido = useMemo(() => ({ filtros, pagina }), [filtros, pagina]);
@@ -288,6 +296,20 @@ export default function PaginaJogadores() {
             jogador={condicaoDe}
             aoSalvar={recarregar}
             aoFechar={() => setCondicaoDe(null)}
+          />
+        )}
+      </Modal>
+      <Modal
+        aberto={comprarDe !== null}
+        titulo="Comprar jogador"
+        aoFechar={() => setComprarDe(null)}
+      >
+        {comprarDe && (
+          <FormularioCompra
+            jogador={comprarDe}
+            clubes={clubes ?? []}
+            aoSalvar={recarregar}
+            aoFechar={() => setComprarDe(null)}
           />
         )}
       </Modal>

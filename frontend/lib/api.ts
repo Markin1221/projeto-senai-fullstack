@@ -8,6 +8,8 @@ import type {
   Pagina,
   NovoClube,
   ClubeDetalhado,
+  CorpoCompra,
+  ResultadoCompra,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -116,3 +118,5 @@ export const criarClube = (corpo: NovoClube) =>
   api.post<Clube>("/clubs", corpo);
 export const buscarClube = (id: string) =>
   api.get<ClubeDetalhado>(`/clubs/${encodeURIComponent(id)}`);
+export const comprarJogador = (id: number, corpo: CorpoCompra) =>
+  api.post<ResultadoCompra>(`/players/${id}/buy`, corpo);

@@ -87,3 +87,27 @@ export interface JogadorDoElenco extends Jogador {
 export interface ClubeDetalhado extends Clube {
   players: JogadorDoElenco[];
 }
+export interface CorpoCompra {
+  club_id: number;
+  loyalty_until: string;
+}
+
+export interface ResultadoCompra {
+  id: number;
+  club_id: number;
+  player_id: number;
+  player_name: string;
+  type: "COMPRA";
+  value: number;
+  fee: number;
+  penalty: number;
+  profit: number | null;
+  cash_change: number;
+  created_at: string;
+  contract: {
+    purchase_value: number;
+    loyalty_until: string;
+    status: string;
+  };
+  club_cash: number;
+}
