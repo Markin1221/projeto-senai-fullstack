@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
 import { CartaoIndicador } from "@/components/cartao-indicador";
+import { ConfirmacaoVenda } from "@/components/confirmacao-venda";
+import { Modal } from "@/components/modal";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useDados } from "@/hooks/use-dados";
 import { buscarClube } from "@/lib/api";
 import {
@@ -16,48 +19,63 @@ import {
 } from "@/lib/formatar";
 import type { JogadorDoElenco } from "@/lib/tipos";
 
-const COLUNAS: Coluna<JogadorDoElenco>[] = [
-  { titulo: "Nome", celula: (j) => j.name },
-  { titulo: "Posição", celula: (j) => j.position },
-  { titulo: "Overall", celula: (j) => j.overall, numerica: true },
-  {
-    titulo: "Condição",
-    celula: (j) => (
-      <Badge variant={j.condition === "APTO" ? "secondary" : "outline"}>
-        {rotuloCondicao(j.condition)}
-      </Badge>
-    ),
-  },
-  {
-    titulo: "Valor de mercado",
-    celula: (j) => formatarMoeda(j.market_value),
-    numerica: true,
-  },
-  {
-    titulo: "Valor de compra",
-    celula: (j) => formatarMoeda(j.contract.purchase_value),
-    numerica: true,
-  },
-  {
-    titulo: "Fidelidade até",
-    celula: (j) => formatarDataHora(j.contract.loyalty_until),
-  },
-  {
-    titulo: "Dias restantes",
-    celula: (j) => j.contract.remaining_days,
-    numerica: true,
-  },
-  {
-    titulo: "Multa",
-    celula: (j) => `${j.contract.penalty_rate}%`,
-    numerica: true,
-  },
-];
+function criarColunas(
+  aoVender: (jogador: JogadorDoElenco) => void,
+): Coluna<JogadorDoElenco>[] {
+  return [
+    { titulo: "Nome", celula: (j) => j.name },
+    { titulo: "Posição", celula: (j) => j.position },
+    { titulo: "Overall", celula: (j) => j.overall, numerica: true },
+    {
+      titulo: "Condição",
+      celula: (j) => (
+        <Badge variant={j.condition === "APTO" ? "secondary" : "outline"}>
+          {rotuloCondicao(j.condition)}
+        </Badge>
+      ),
+    },
+    {
+      titulo: "Valor de mercado",
+      celula: (j) => formatarMoeda(j.market_value),
+      numerica: true,
+    },
+    {
+      titulo: "Valor de compra",
+      celula: (j) => formatarMoeda(j.contract.purchase_value),
+      numerica: true,
+    },
+    {
+      titulo: "Fidelidade até",
+      celula: (j) => formatarDataHora(j.contract.loyalty_until),
+    },
+    {
+      titulo: "Dias restantes",
+      celula: (j) => j.contract.remaining_days,
+      numerica: true,
+    },
+    {
+      titulo: "Multa",
+      celula: (j) => `${j.contract.penalty_rate}%`,
+      numerica: true,
+    },
+    {
+      titulo: "Ações",
+      celula: (j) => (
+        <Button variant="outline" size="sm" onClick={() => aoVender(j)}>
+          Vender
+        </Button>
+      ),
+    },
+  ];
+}
 
 export default function PaginaClube() {
   const { id } = useParams<{ id: string }>();
+  const [vendendo, setVendendo] = useState<JogadorDoElenco | null>(null);
+
   const carregar = useCallback(() => buscarClube(id), [id]);
   const { dados: clube, carregando, erro, recarregar } = useDados(carregar);
+  const colunas = useMemo(() => criarColunas(setVendendo), []);
 
   return (
     <section className="space-y-4">
@@ -93,7 +111,7 @@ export default function PaginaClube() {
 
           <h2 className="text-lg font-semibold">Elenco</h2>
           <TabelaDados
-            colunas={COLUNAS}
+            colunas={colunas}
             linhas={clube?.players}
             carregando={carregando}
             vazio="Este clube ainda não tem jogadores."
@@ -101,6 +119,20 @@ export default function PaginaClube() {
           />
         </>
       )}
+
+      <Modal
+        aberto={vendendo !== null}
+        titulo="Vender jogador"
+        aoFechar={() => setVendendo(null)}
+      >
+        {vendendo && (
+          <ConfirmacaoVenda
+            jogador={vendendo}
+            aoSalvar={recarregar}
+            aoFechar={() => setVendendo(null)}
+          />
+        )}
+      </Modal>
     </section>
   );
 }

@@ -134,6 +134,7 @@ export default function PaginaJogadores() {
       editar: (jogador) => setCadastro({ jogador }),
       condicao: setCondicaoDe,
       excluir: setParaExcluir,
+      comprar: setComprarDe,
     }),
     [],
   );
