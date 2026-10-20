@@ -12,6 +12,8 @@ import type {
   ResultadoCompra,
   ResultadoVenda,
   RespostaHistorico,
+  Escalacao,
+  CorpoEscalacao,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -125,6 +127,16 @@ export const venderJogador = (id: number) =>
   api.post<ResultadoVenda>(`/players/${id}/sell`);
 export const listarTransacoes = (clubeId: number, consulta?: Consulta) =>
   api.get<RespostaHistorico>(`/clubs/${clubeId}/transactions`, consulta);
+export function buscarEscalacao(clubeId: number | string) {
+  return api.get<Escalacao>(`/clubs/${clubeId}/lineup`);
+}
+
+export function salvarEscalacao(
+  clubeId: number | string,
+  corpo: CorpoEscalacao,
+) {
+  return api.put<Escalacao>(`/clubs/${clubeId}/lineup`, corpo);
+}
 
 export async function baixarCsvDoClube(
   clubeId: number,

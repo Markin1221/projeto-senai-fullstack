@@ -20,10 +20,12 @@ import {
   rotuloCondicao,
 } from "@/lib/formatar";
 import type { JogadorDoElenco } from "@/lib/tipos";
+import { EscalacaoClube } from "@/components/escalacao-clube";
 
 const ABAS = [
   { id: "elenco", rotulo: "Elenco" },
   { id: "historico", rotulo: "Histórico" },
+  { id: "escalacao", rotulo: "Escalação" },
 ];
 
 function criarColunas(
@@ -130,6 +132,9 @@ export default function PaginaClube() {
           )}
           {aba === "historico" && clube && (
             <HistoricoTransacoes clubeId={clube.id} clubeNome={clube.name} />
+          )}
+          {aba === "escalacao" && clube && (
+            <EscalacaoClube clubeId={clube.id} elenco={clube.players} />
           )}
         </>
       )}

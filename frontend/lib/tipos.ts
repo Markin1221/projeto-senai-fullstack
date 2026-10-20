@@ -155,3 +155,16 @@ export interface RespostaHistorico {
   data: Transacao[];
   summary: ResumoTransacoes;
 }
+export type Formacao = "3-1" | "2-2" | "2-1-1" | "1-2-1";
+
+export interface Escalacao {
+  club_id: number;
+  formation: Formacao | null;
+  complete: boolean;
+  players: Jogador[];
+}
+
+export interface CorpoEscalacao {
+  formation: Formacao;
+  player_ids: number[];
+}
