@@ -14,6 +14,8 @@ import type {
   RespostaHistorico,
   Escalacao,
   CorpoEscalacao,
+  Partida,
+  CorpoPartida,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -129,6 +131,9 @@ export const listarTransacoes = (clubeId: number, consulta?: Consulta) =>
   api.get<RespostaHistorico>(`/clubs/${clubeId}/transactions`, consulta);
 export function buscarEscalacao(clubeId: number | string) {
   return api.get<Escalacao>(`/clubs/${clubeId}/lineup`);
+}
+export function jogarPartida(corpo: CorpoPartida) {
+  return api.post<Partida>("/matches", corpo);
 }
 
 export function salvarEscalacao(

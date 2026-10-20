@@ -1,5 +1,8 @@
 export type Posicao = "GOL" | "ZAG" | "LAT" | "MEI" | "ATA";
 export type Condicao = "APTO" | "MAL_CONDICIONADO" | "DOENTE";
+export type Formacao = "3-1" | "2-2" | "2-1-1" | "1-2-1";
+export type ResultadoPartida = "MANDANTE" | "VISITANTE" | "EMPATE";
+export type AtributoDuelo = "shooting" | "passing" | "dribbling" | "defending";
 
 export interface Jogador {
   id: number;
@@ -155,7 +158,6 @@ export interface RespostaHistorico {
   data: Transacao[];
   summary: ResumoTransacoes;
 }
-export type Formacao = "3-1" | "2-2" | "2-1-1" | "1-2-1";
 
 export interface Escalacao {
   club_id: number;
@@ -167,4 +169,42 @@ export interface Escalacao {
 export interface CorpoEscalacao {
   formation: Formacao;
   player_ids: number[];
+}
+
+export interface LadoPartida {
+  club_id: number;
+  club_name: string;
+  formation: Formacao;
+  goals: number;
+}
+
+export interface ParticipanteDuelo {
+  player_id: number;
+  player_name: string;
+  position: Posicao;
+  condition: Condicao;
+  attribute: AtributoDuelo;
+  value: number;
+}
+
+export interface Duelo {
+  order: number;
+  attacking_club_id: number;
+  attacker: ParticipanteDuelo;
+  defender: ParticipanteDuelo;
+  goal: boolean;
+}
+
+export interface Partida {
+  id: number;
+  played_at: string;
+  home: LadoPartida;
+  away: LadoPartida;
+  result: ResultadoPartida;
+  duels?: Duelo[];
+}
+
+export interface CorpoPartida {
+  home_club_id: number;
+  away_club_id: number;
 }
