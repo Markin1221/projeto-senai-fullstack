@@ -6,7 +6,7 @@
 >
 > **Meta:** enviar na **quarta 21/10 até as 15h**. Limite oficial: sexta 23/10, 20h. Quinta e sexta ficam de reserva.
 
-> **Status (seg 19/10, 23:15):** F01 a F14 **feitos** no frontend (Jogadores, Clubes, página do clube com Elenco, Histórico e Escalação, Compra, Venda, Partidas com duelos, Histórico de partidas, Classificação). Adiantou a terça inteira de "Histórico" e "Liga". **Pendente:** conferir a Classificação na tela, confirmar os pushes (Compra, Venda, Histórico, Liga), estados das 6 listas, diferenciais, README final, ensaio e envio. Depois disso, passada visual opcional (ver "Passada de design").
+> **Status (seg 19/10, 23:15):** F01 a F14 **feitos** no frontend (Jogadores, Clubes, página do clube com Elenco, Histórico e Escalação, Compra, Venda, Partidas com duelos, Histórico de partidas, Classificação). Adiantou a terça inteira de "Histórico" e "Liga". **Pendente:** conferir a Classificação na tela, estados das 6 listas, diferenciais, README final, ensaio e envio. Depois disso, passada visual opcional (ver "Passada de design").
 
 ## Resumo
 
@@ -78,7 +78,7 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 - [x] Botão Comprar nos jogadores livres: escolher o clube, digitar data e hora (horário de Brasília, enviado com `-03:00`), confirmar.
 - [x] Resultado: valor, taxa, custo total (valor + taxa), fim da fidelidade e novo caixa. Recusas mostram o `message`.
 - [x] Depois da compra, a tabela mostra o clube do jogador, o filtro por clube o encontra e o filtro só livres deixa de mostrá-lo.
-- [ ] Confirmar o push da Compra.
+- [x] Push da Compra (feito a cada etapa).
 
 ---
 
@@ -87,7 +87,7 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 ### Venda (F08)
 
 - [x] Botão Vender na página do clube, com confirmação. Resultado: valor de compra, valor de venda, dias restantes, multa, lucro, comissão, crédito e novo caixa. Recusa mostra o `message`. A confirmação mostra o valor de mercado, o valor de compra, o fim da fidelidade, os dias restantes e o % de multa.
-- [ ] Confirmar o push da Venda.
+- [x] Push da Venda.
 
 ### Histórico, totais e CSV (F09 a F11)
 
@@ -95,7 +95,7 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 - [x] Filtro por um ou mais tipos e por jogador. Se a API recusar (jogador excluído), mostra o `message`.
 - [x] Totais do `summary` abaixo da tabela, respeitando o filtro.
 - [x] Botão **Exportar CSV**: baixa o arquivo de `GET /clubs/{id}/transactions/export` com os filtros aplicados (nome do arquivo `historico de (nome do clube)`).
-- [ ] Confirmar o push do Histórico.
+- [x] Push do Histórico.
 
 ### Liga (F12 a F14)
 
@@ -103,7 +103,7 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 - [x] **Partida (F13):** escolher mandante e visitante e jogar (clique duplo gera uma só partida). Mostra placar e os **6 duelos** devolvidos pela API. Clube sem escalação: `message` da API.
 - [x] **Histórico de partidas (F14):** partidas da mais recente para a mais antiga, com filtro por clube e os duelos ao abrir.
 - [ ] **Classificação (F14):** tela feita na ordem da API com J, V, E, D, GP, GC, SG e pontos. **Falta conferir na tela** (jogar 2 partidas e ver pontos e saldo; clube sem jogo aparece zerado).
-- [ ] Rodar `npm run lint` e `npm run build` no frontend. Push da Liga.
+- [ ] Rodar `npm run lint` e `npm run build` no frontend (push da Liga já feito por etapa).
 
 ### Estados das 6 listas
 
