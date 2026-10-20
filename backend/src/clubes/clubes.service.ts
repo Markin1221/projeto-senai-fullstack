@@ -2,7 +2,6 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { formatarDataBrasilia } from '../common/utils/datas';
 import { compararNomes } from '../common/utils/texto';
@@ -11,7 +10,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { diasRestantes, percentualMulta } from '../regras/mercado';
 import { resumoDoClube } from './clube.mapper';
 import { CriarClubeDto } from './dto/criar-clube.dto';
-import { posicoesFecham, Formacao, Posicao } from '../regras/regras';
 
 const LIMITE_CLUBES = 20;
 

@@ -76,13 +76,18 @@ npm run build
 npm run start
 ```
 
-Verificação de código do frontend: `npm run lint`.
+**Documentação interativa (Swagger):** com a API rodando, abra `http://localhost:3000/docs`.
 
-**Testes unitários** (na pasta `backend`):
+**Testes unitários** (na pasta `backend`; terminam sozinhos, sem modo de observação):
 
 ```
 npm test
 ```
+
+**Lint e formatação** (só verificam, não alteram arquivos):
+
+- backend, na pasta `backend`: `npm run lint` e `npm run format:check` (para formatar: `npm run format`);
+- frontend, na pasta `frontend`: `npm run lint` e `npm run format:check` (para formatar: `npm run format`).
 
 **Chamadas de exemplo:** os arquivos `.http` de `backend/requests/` (`jogadores.http`, `fluxo-mercado.http` e `escalacao.http`) cobrem cadastro, compra, venda, histórico, CSV, escalação, partidas e classificação. Abra no VS Code com a extensão REST Client e clique em "Send Request", na ordem.
 
@@ -154,6 +159,7 @@ frontend/
 | Biblioteca                              | Motivo                                                                         |
 | --------------------------------------- | ------------------------------------------------------------------------------ |
 | NestJS (`@nestjs/*`) e Express          | Framework da API REST                                                          |
+| `@nestjs/swagger`                       | Documentação interativa da API (`/docs`)                                       |
 | Prisma (`prisma`, `@prisma/client`)     | ORM, migrations versionadas e acesso ao PostgreSQL                             |
 | `class-validator` e `class-transformer` | Validação declarativa dos DTOs (corpo e query params)                          |
 | `decimal.js`                            | Cálculos de dinheiro sem `float`, com arredondamento "meio para longe do zero" |
@@ -169,10 +175,12 @@ frontend/
 | Next.js (App Router) e React                                       | Framework e interface; o servidor do Next só repassa `/api/v1/*` ao backend |
 | Tailwind CSS e `@tailwindcss/postcss`                              | Estilos utilitários                                                         |
 | shadcn/ui (`shadcn`, `@base-ui/react`, `class-variance-authority`) | Componentes base (botão, campo, tabela, selo, esqueleto de carregamento)    |
+| `cn`                                                               | Junta nomes de classe CSS (usada pelos componentes do shadcn/ui)            |
 | `tw-animate-css`                                                   | Animações exigidas pelos componentes do shadcn/ui                           |
 | `lucide-react`                                                     | Ícones dos componentes do shadcn/ui                                         |
 | `sonner` e `next-themes`                                           | Avisos (toasts) de sucesso e de erro                                        |
 | ESLint (`eslint`, `eslint-config-next`)                            | Verificação de código                                                       |
+| Prettier                                                           | Formatação do código                                                        |
 
 ## 6. Funcionalidades
 
@@ -186,6 +194,7 @@ frontend/
 | Escalação (`PUT` e `GET /clubs/{id}/lineup`)                                    | Pronto   |
 | Partidas (`POST /matches`), histórico (`GET /matches`, `GET /matches/{id}`)     | Pronto   |
 | Classificação (`GET /standings`)                                                | Pronto   |
+| Documentação interativa (Swagger em `/docs`)                                    | Pronto   |
 | Frontend: lista de jogadores com busca, filtros, ordenação e paginação          | Pronto   |
 | Frontend: cadastro, edição, alteração de condição e exclusão de jogador         | Pronto   |
 | Frontend: lista e criação de clubes; página do clube com elenco e contratos     | Pronto   |
@@ -215,17 +224,18 @@ frontend/
 - **Frontend só repassa chamadas:** o Next não acessa o banco nem calcula regra. O `rewrites` do `next.config.ts` encaminha `/api/v1/*` para o backend (`API_URL`), então o navegador fala só com `localhost:3001`. Todos os valores (valor de mercado, overall, taxa, multa, comissão, crédito) vêm prontos da API e a tela só os exibe e formata. Somar valor e taxa para mostrar o custo total da compra é a única conta feita na tela (feita a partir do `cash_change` devolvido).
 - **Camada única de API no frontend:** nenhuma chamada `fetch` fica em componente. Tudo passa por `frontend/lib/api.ts` (cliente com `ApiError`), e os dados são carregados pelo hook `useDados`, que trata carregando, erro e recarga. Depois de cada ação, a tela recarrega a consulta afetada, sem recarregar a página.
 - **Envio sem clique duplo:** o hook `useEnvio` desabilita o botão durante o envio e descarta um segundo clique, então cada ação gera um só pedido.
-- **Mensagens e validação nas telas:** toda recusa da API mostra o `message` dela. Os formulários validam antes de enviar os campos obrigatórios e os limites de um campo só (por exemplo, idade de 16 a 45); as regras que cruzam campos (como a soma dos atributos) ficam na API.
+- **Mensagens e validação nas telas:** toda recusa da API mostra o `message` dela; quando a API está fora do ar, a tela mostra um aviso de que não foi possível falar com ela. Os formulários validam antes de enviar os campos obrigatórios e os limites de um campo só (por exemplo, idade de 16 a 45); as regras que cruzam campos (como a soma dos atributos) ficam na API.
 - **Formulários em modal:** os formulários e as confirmações usam o elemento `<dialog>` nativo. Como o modal cobre a tela, os erros da API aparecem dentro dele.
 - **Data e hora da compra:** a tela usa um campo de data e hora local e envia `AAAA-MM-DDTHH:MM-03:00`, o formato da API.
 - **Histórico no frontend:** a aba "Histórico" da página do clube filtra por tipo e jogador, mostra os totais (`summary`) da API para o mesmo filtro e baixa o CSV que a API gera (`GET /clubs/{id}/transactions/export`), com o nome `historico de (clube)`. A tela não monta o CSV.
 - **Escalação no frontend:** a aba "Escalação" oferece só jogadores do elenco que não estão `DOENTE` e que cabem na posição de cada vaga da formação escolhida. Quem decide se a escalação é válida continua sendo a API (409 com `message`). Escalação incompleta mostra um aviso de que o clube não pode jogar.
 - **Partidas no frontend:** o resultado e os 6 duelos vêm prontos da API. O histórico de partidas filtra por clube e abre os duelos de cada partida; a classificação mostra a ordem devolvida pela API, sem reordenar.
+- **Listas com os três estados:** jogadores, clubes, elenco, histórico de transações, histórico de partidas e classificação mostram carregando, vazio e erro (com botão para tentar de novo).
 
 ## 8. Funcionalidades não implementadas
 
 - **Frontend:** nenhuma funcionalidade obrigatória pendente. Não há testes automatizados no frontend nem layout para celular.
-- **Diferenciais do backend:** documentação interativa (Swagger) e Docker Compose da aplicação completa (hoje o Compose sobe só o banco).
+- **Diferenciais do backend:** Docker Compose da aplicação completa (hoje o Compose sobe só o banco).
 
 Atualizar esta seção antes da entrega.
 

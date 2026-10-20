@@ -42,54 +42,58 @@ export function TabelaDados<T>({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {colunas.map((c) => (
-            <TableHead
-              key={c.titulo}
-              className={c.numerica ? "text-right" : undefined}
-            >
-              {c.titulo}
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {carregando &&
-          Array.from({ length: 5 }, (_, i) => (
-            <TableRow key={i}>
-              {colunas.map((c) => (
-                <TableCell key={c.titulo}>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        {!carregando && linhas?.length === 0 && (
+    <div className="overflow-hidden rounded-lg border bg-card">
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell
-              colSpan={colunas.length}
-              className="py-8 text-center text-muted-foreground"
-            >
-              {vazio}
-            </TableCell>
+            {colunas.map((c) => (
+              <TableHead
+                key={c.titulo}
+                className={c.numerica ? "text-right" : undefined}
+              >
+                {c.titulo}
+              </TableHead>
+            ))}
           </TableRow>
-        )}
-        {!carregando &&
-          linhas?.map((linha) => (
-            <TableRow key={chave(linha)}>
-              {colunas.map((c) => (
-                <TableCell
-                  key={c.titulo}
-                  className={c.numerica ? "text-right tabular-nums" : undefined}
-                >
-                  {c.celula(linha)}
-                </TableCell>
-              ))}
+        </TableHeader>
+        <TableBody>
+          {carregando &&
+            Array.from({ length: 5 }, (_, i) => (
+              <TableRow key={i}>
+                {colunas.map((c) => (
+                  <TableCell key={c.titulo}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          {!carregando && linhas?.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={colunas.length}
+                className="py-8 text-center text-muted-foreground"
+              >
+                {vazio}
+              </TableCell>
             </TableRow>
-          ))}
-      </TableBody>
-    </Table>
+          )}
+          {!carregando &&
+            linhas?.map((linha) => (
+              <TableRow key={chave(linha)}>
+                {colunas.map((c) => (
+                  <TableCell
+                    key={c.titulo}
+                    className={
+                      c.numerica ? "text-right tabular-nums" : undefined
+                    }
+                  >
+                    {c.celula(linha)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

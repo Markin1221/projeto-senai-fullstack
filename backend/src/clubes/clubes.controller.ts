@@ -1,19 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { IdPipe } from '../common/pipes/id.pipe';
 import { ClubesService } from './clubes.service';
 import { CriarClubeDto } from './dto/criar-clube.dto';
 import { ListarClubesQuery } from './dto/listar-clubes.query';
-import { DefinirEscalacaoDto } from '../escalacao/dto/definir-escalacao.dto';
 
 @Controller('clubs')
 export class ClubesController {

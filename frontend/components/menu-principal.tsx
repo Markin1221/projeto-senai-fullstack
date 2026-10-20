@@ -25,8 +25,8 @@ export function MenuPrincipal() {
             className={cn(
               "rounded-md px-3 py-2 text-sm font-medium",
               ativo
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                ? "bg-white/20 text-white"
+                : "text-white/75 hover:bg-white/10 hover:text-white",
             )}
           >
             {item.rotulo}

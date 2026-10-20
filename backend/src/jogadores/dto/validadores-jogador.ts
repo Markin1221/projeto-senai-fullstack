@@ -29,7 +29,7 @@ function lerAtributos(corpo: Corpo): number[] | null {
 export class NomeJogadorValido implements ValidatorConstraintInterface {
   validate(valor: unknown): boolean {
     if (typeof valor !== 'string') return false;
-    const tamanho = [...valor].length;
+    const tamanho = Array.from(valor).length;
     if (tamanho < 3 || tamanho > 100) return false;
     if (/\p{Cc}/u.test(valor) || /[0-9]/.test(valor)) return false;
     const palavras = valor.split(' ').filter((parte) => /\p{L}/u.test(parte));
@@ -43,9 +43,7 @@ export class NomeJogadorValido implements ValidatorConstraintInterface {
 
 /** Com 35 anos ou mais, a agilidade vai até 85. */
 @ValidatorConstraint({ name: 'agilidadeCompativelComIdade', async: false })
-export class AgilidadeCompativelComIdade
-  implements ValidatorConstraintInterface
-{
+export class AgilidadeCompativelComIdade implements ValidatorConstraintInterface {
   validate(agilidade: unknown, args: ValidationArguments): boolean {
     const { age } = args.object as Corpo;
     if (!ehInteiro(agilidade) || !ehInteiro(age)) return true;

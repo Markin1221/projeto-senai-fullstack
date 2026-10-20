@@ -58,11 +58,14 @@ async function lerErro(resposta: Response): Promise<ApiError> {
   } catch {
     mensagem = undefined;
   }
+  const textoPadrao =
+    resposta.status >= 500
+      ? "Não foi possível falar com a API. Verifique se o servidor está no ar e tente de novo."
+      : `Erro ${resposta.status}`;
+
   return new ApiError(
     resposta.status,
-    typeof mensagem === "string" && mensagem
-      ? mensagem
-      : `Erro ${resposta.status}`,
+    typeof mensagem === "string" && mensagem ? mensagem : textoPadrao,
   );
 }
 
