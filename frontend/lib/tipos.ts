@@ -129,3 +129,29 @@ export interface ResultadoVenda {
   contract_status: string;
   club_cash: number;
 }
+export interface Transacao {
+  id: number;
+  club_id: number;
+  player_id: number;
+  player_name: string;
+  type: "COMPRA" | "VENDA";
+  value: number;
+  fee: number;
+  penalty: number;
+  profit: number | null;
+  cash_change: number;
+  created_at: string;
+}
+
+export interface ResumoTransacoes {
+  total_spent: number;
+  total_received: number;
+  total_fees: number;
+  total_penalties: number;
+  total_profit: number;
+}
+
+export interface RespostaHistorico {
+  data: Transacao[];
+  summary: ResumoTransacoes;
+}

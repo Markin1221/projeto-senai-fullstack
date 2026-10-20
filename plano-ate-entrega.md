@@ -40,7 +40,7 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 
 ## Segunda 19/10
 
-> **Status (seg 19/10, 12:50):** F01 a F05 prontos e testados; página do clube (F07) com indicadores e elenco pronta. **Compra (F06) e as seções Histórico e Escalação da página do clube ficam para a terça de manhã.**
+> **Status (seg 19/10, 18:35):** F01 a F06 prontos e testados (Jogadores, Clubes, página do clube com indicadores e elenco, Compra). **Pendente: seções Histórico e Escalação da página do clube (terça) e confirmar o push da Compra.**
 
 ### 11:00 (15 min): conferir o esqueleto
 
@@ -75,12 +75,10 @@ Use o contrato do `README.md`: **snake_case**, IDs inteiros, `POST /players/{id}
 
 ### 20:30 às 22:30: Compra (F06)
 
-- [ ] Botão Comprar nos jogadores livres: escolher o clube, digitar data e hora (horário de Brasília, enviado com `-03:00`), confirmar.
-- [ ] Resultado: valor, taxa, custo total (valor + taxa), fim da fidelidade e novo caixa. Recusas mostram o `message`.
-- [ ] Depois da compra, a tabela mostra o clube do jogador, o filtro por clube o encontra e o filtro só livres deixa de mostrá-lo.
-- [ ] Push e atualizar este arquivo marcando o que ficou pronto.
-
-Se a Compra não fechar hoje, ela abre a terça de manhã.
+- [x] Botão Comprar nos jogadores livres: escolher o clube, digitar data e hora (horário de Brasília, enviado com `-03:00`), confirmar.
+- [x] Resultado: valor, taxa, custo total (valor + taxa), fim da fidelidade e novo caixa. Recusas mostram o `message`.
+- [x] Depois da compra, a tabela mostra o clube do jogador, o filtro por clube o encontra e o filtro só livres deixa de mostrá-lo.
+- [ ] Push e atualizar este arquivo marcando o que ficou pronto. _(Arquivo atualizado; falta confirmar o push da Compra.)_
 
 ---
 

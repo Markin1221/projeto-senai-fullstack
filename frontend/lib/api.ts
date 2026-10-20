@@ -11,6 +11,7 @@ import type {
   CorpoCompra,
   ResultadoCompra,
   ResultadoVenda,
+  RespostaHistorico,
 } from "@/lib/tipos";
 
 const BASE = "/api/v1";
@@ -45,6 +46,22 @@ export function montarUrl(caminho: string, consulta?: Consulta): string {
   return `${BASE}${caminho}${texto ? `?${texto}` : ""}`;
 }
 
+async function lerErro(resposta: Response): Promise<ApiError> {
+  const texto = await resposta.text();
+  let mensagem: unknown;
+  try {
+    mensagem = (JSON.parse(texto) as { message?: unknown }).message;
+  } catch {
+    mensagem = undefined;
+  }
+  return new ApiError(
+    resposta.status,
+    typeof mensagem === "string" && mensagem
+      ? mensagem
+      : `Erro ${resposta.status}`,
+  );
+}
+
 async function requisitar<T>(
   metodo: string,
   caminho: string,
@@ -65,26 +82,9 @@ async function requisitar<T>(
     throw new ApiError(0, MENSAGEM_REDE);
   }
 
+  if (!resposta.ok) throw await lerErro(resposta);
   if (resposta.status === 204) return undefined as T;
-
-  const texto = await resposta.text();
-  let json: unknown;
-  try {
-    json = texto ? JSON.parse(texto) : undefined;
-  } catch {
-    json = undefined;
-  }
-
-  if (!resposta.ok) {
-    const mensagem = (json as { message?: unknown } | undefined)?.message;
-    throw new ApiError(
-      resposta.status,
-      typeof mensagem === "string" && mensagem
-        ? mensagem
-        : `Erro ${resposta.status}`,
-    );
-  }
-  return json as T;
+  return (await resposta.json()) as T;
 }
 
 export const api = {
@@ -123,3 +123,19 @@ export const comprarJogador = (id: number, corpo: CorpoCompra) =>
   api.post<ResultadoCompra>(`/players/${id}/buy`, corpo);
 export const venderJogador = (id: number) =>
   api.post<ResultadoVenda>(`/players/${id}/sell`);
+export const listarTransacoes = (clubeId: number, consulta?: Consulta) =>
+  api.get<RespostaHistorico>(`/clubs/${clubeId}/transactions`, consulta);
+
+export async function baixarCsvDoClube(
+  clubeId: number,
+  consulta?: Consulta,
+): Promise<Blob> {
+  let resposta: Response;
+  try {
+    resposta = await fetch(urlCsvDoClube(clubeId, consulta));
+  } catch {
+    throw new ApiError(0, MENSAGEM_REDE);
+  }
+  if (!resposta.ok) throw await lerErro(resposta);
+  return resposta.blob();
+}

@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
+import { Abas } from "@/components/abas";
 import { AlertaErro } from "@/components/alerta-erro";
 import { CartaoIndicador } from "@/components/cartao-indicador";
 import { ConfirmacaoVenda } from "@/components/confirmacao-venda";
+import { HistoricoTransacoes } from "@/components/historico-transacoes";
 import { Modal } from "@/components/modal";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,11 @@ import {
   rotuloCondicao,
 } from "@/lib/formatar";
 import type { JogadorDoElenco } from "@/lib/tipos";
+
+const ABAS = [
+  { id: "elenco", rotulo: "Elenco" },
+  { id: "historico", rotulo: "Histórico" },
+];
 
 function criarColunas(
   aoVender: (jogador: JogadorDoElenco) => void,
@@ -71,6 +78,7 @@ function criarColunas(
 
 export default function PaginaClube() {
   const { id } = useParams<{ id: string }>();
+  const [aba, setAba] = useState("elenco");
   const [vendendo, setVendendo] = useState<JogadorDoElenco | null>(null);
 
   const carregar = useCallback(() => buscarClube(id), [id]);
@@ -109,14 +117,20 @@ export default function PaginaClube() {
             />
           </div>
 
-          <h2 className="text-lg font-semibold">Elenco</h2>
-          <TabelaDados
-            colunas={colunas}
-            linhas={clube?.players}
-            carregando={carregando}
-            vazio="Este clube ainda não tem jogadores."
-            chave={(j) => j.id}
-          />
+          <Abas abas={ABAS} ativa={aba} aoMudar={setAba} />
+
+          {aba === "elenco" && (
+            <TabelaDados
+              colunas={colunas}
+              linhas={clube?.players}
+              carregando={carregando}
+              vazio="Este clube ainda não tem jogadores."
+              chave={(j) => j.id}
+            />
+          )}
+          {aba === "historico" && clube && (
+            <HistoricoTransacoes clubeId={clube.id} clubeNome={clube.name} />
+          )}
         </>
       )}
 
