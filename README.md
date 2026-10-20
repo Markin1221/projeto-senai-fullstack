@@ -146,9 +146,10 @@ backend/
     escalacao/              escalação (PUT e GET /clubs/{id}/lineup)
     partidas/               partidas, duelos, histórico de partidas e classificação
 frontend/
-  app/                      páginas (App Router): jogadores, clubes, clubes/[id], partidas e classificação
-  components/               componentes compartilhados (tabela, campos, modal, formulários,
-                            histórico de transações, escalação, duelos e histórico de partidas)
+  app/                      páginas (App Router): início, jogadores, clubes, clubes/[id], partidas,
+                            partidas/[id] (duelos) e classificação
+  components/               componentes compartilhados (barra lateral, tabela, campos, modal, formulários,
+                            histórico de transações, escalação, campo da partida, duelos e histórico de partidas)
   components/ui/            componentes base do shadcn/ui
   hooks/                    useDados (carregamento), useEnvio (envio sem clique duplo), useDebounce
   lib/                      cliente da API, tipos, formatação, filtros e validações dos formulários
@@ -184,24 +185,25 @@ frontend/
 
 ## 6. Funcionalidades
 
-| Funcionalidade                                                                  | Situação |
-| ------------------------------------------------------------------------------- | -------- |
-| Jogadores: `POST`, `GET` (lista e por id), `PUT`, `PATCH /condition` e `DELETE` | Pronto   |
-| Valor base, overall e valor de mercado (RN02 a RN06), com testes                | Pronto   |
-| Clubes: `POST`, `GET` (lista e por id)                                          | Pronto   |
-| Compra (`POST /players/{id}/buy`) e venda (`POST /players/{id}/sell`)           | Pronto   |
-| Histórico de transações e exportação CSV                                        | Pronto   |
-| Escalação (`PUT` e `GET /clubs/{id}/lineup`)                                    | Pronto   |
-| Partidas (`POST /matches`), histórico (`GET /matches`, `GET /matches/{id}`)     | Pronto   |
-| Classificação (`GET /standings`)                                                | Pronto   |
-| Documentação interativa (Swagger em `/docs`)                                    | Pronto   |
-| Frontend: lista de jogadores com busca, filtros, ordenação e paginação          | Pronto   |
-| Frontend: cadastro, edição, alteração de condição e exclusão de jogador         | Pronto   |
-| Frontend: lista e criação de clubes; página do clube com elenco e contratos     | Pronto   |
-| Frontend: compra e venda                                                        | Pronto   |
-| Frontend: histórico de transações e exportação CSV                              | Pronto   |
-| Frontend: escalação do clube, com aviso de escalação incompleta                 | Pronto   |
-| Frontend: partidas com placar e 6 duelos, histórico de partidas e classificação | Pronto   |
+| Funcionalidade                                                                                                        | Situação |
+| --------------------------------------------------------------------------------------------------------------------- | -------- |
+| Jogadores: `POST`, `GET` (lista e por id), `PUT`, `PATCH /condition` e `DELETE`                                       | Pronto   |
+| Valor base, overall e valor de mercado (RN02 a RN06), com testes                                                      | Pronto   |
+| Clubes: `POST`, `GET` (lista e por id)                                                                                | Pronto   |
+| Compra (`POST /players/{id}/buy`) e venda (`POST /players/{id}/sell`)                                                 | Pronto   |
+| Histórico de transações e exportação CSV                                                                              | Pronto   |
+| Escalação (`PUT` e `GET /clubs/{id}/lineup`)                                                                          | Pronto   |
+| Partidas (`POST /matches`), histórico (`GET /matches`, `GET /matches/{id}`)                                           | Pronto   |
+| Classificação (`GET /standings`)                                                                                      | Pronto   |
+| Documentação interativa (Swagger em `/docs`)                                                                          | Pronto   |
+| Frontend: lista de jogadores com busca, filtros, ordenação e paginação                                                | Pronto   |
+| Frontend: cadastro, edição, alteração de condição e exclusão de jogador                                               | Pronto   |
+| Frontend: lista e criação de clubes; página do clube com elenco e contratos                                           | Pronto   |
+| Frontend: compra e venda                                                                                              | Pronto   |
+| Frontend: histórico de transações e exportação CSV                                                                    | Pronto   |
+| Frontend: escalação do clube, com aviso de escalação incompleta                                                       | Pronto   |
+| Frontend: partidas (nova partida, última partida e histórico), página de duelos com campo e 6 duelos, e classificação | Pronto   |
+| Frontend: tela inicial e barra lateral com contadores, clubes e resumo da liga                                        | Pronto   |
 
 ## 7. Decisões e premissas
 
@@ -226,18 +228,18 @@ frontend/
 - **Envio sem clique duplo:** o hook `useEnvio` desabilita o botão durante o envio e descarta um segundo clique, então cada ação gera um só pedido.
 - **Mensagens e validação nas telas:** toda recusa da API mostra o `message` dela; quando a API está fora do ar, a tela mostra um aviso de que não foi possível falar com ela. Os formulários validam antes de enviar os campos obrigatórios e os limites de um campo só (por exemplo, idade de 16 a 45); as regras que cruzam campos (como a soma dos atributos) ficam na API.
 - **Formulários em modal:** os formulários e as confirmações usam o elemento `<dialog>` nativo. Como o modal cobre a tela, os erros da API aparecem dentro dele.
-- **Data e hora da compra:** a tela usa um campo de data e hora local e envia `AAAA-MM-DDTHH:MM-03:00`, o formato da API.
+- **Data e hora da compra:** a tela usa um campo de data e um de hora (horário de Brasília) e envia `AAAA-MM-DDTHH:MM-03:00`, o formato da API.
 - **Histórico no frontend:** a aba "Histórico" da página do clube filtra por tipo e jogador, mostra os totais (`summary`) da API para o mesmo filtro e baixa o CSV que a API gera (`GET /clubs/{id}/transactions/export`), com o nome `historico de (clube)`. A tela não monta o CSV.
 - **Escalação no frontend:** a aba "Escalação" oferece só jogadores do elenco que não estão `DOENTE` e que cabem na posição de cada vaga da formação escolhida. Quem decide se a escalação é válida continua sendo a API (409 com `message`). Escalação incompleta mostra um aviso de que o clube não pode jogar.
-- **Partidas no frontend:** o resultado e os 6 duelos vêm prontos da API. O histórico de partidas filtra por clube e abre os duelos de cada partida; a classificação mostra a ordem devolvida pela API, sem reordenar.
+- **Partidas no frontend:** o resultado e os 6 duelos vêm prontos da API. O histórico de partidas filtra por clube e abre os duelos de cada partida em uma página própria (`/partidas/{id}`), com o placar, os titulares em campo e a tabela de duelos; depois de jogar uma partida a tela vai direto para essa página; a classificação mostra a ordem devolvida pela API, sem reordenar.
+- **Valores e datas:** os valores aparecem em moedas, com 2 casas decimais e vírgula, sem símbolo de moeda (ex.: `51,58`), e as variações com sinal (`+25,84` e `−22,25`). As datas aparecem no horário de Brasília, no formato `dd/mm/aaaa hh:mm`.
+- **Interface:** segue o mockup do Figma (v1.0) em estrutura, cores e componentes (barra lateral com contadores e clubes, modais, estados e tela inicial). Só tema claro, sem layout para celular.
 - **Listas com os três estados:** jogadores, clubes, elenco, histórico de transações, histórico de partidas e classificação mostram carregando, vazio e erro (com botão para tentar de novo).
 
 ## 8. Funcionalidades não implementadas
 
-- **Frontend:** nenhuma funcionalidade obrigatória pendente. Não há testes automatizados no frontend nem layout para celular.
-- **Diferenciais do backend:** Docker Compose da aplicação completa (hoje o Compose sobe só o banco).
-
-Atualizar esta seção antes da entrega.
+- **Frontend:** nenhuma funcionalidade obrigatória pendente. Não há testes automatizados no frontend, layout para celular (375 px) nem tema escuro.
+- **Diferenciais do backend:** Docker Compose da aplicação completa (hoje o Compose sobe só o banco) e log de requisições por biblioteca de log (o log é um middleware próprio, em `backend/src/common/middleware/`).
 
 ## 9. Uso de inteligência artificial
 
@@ -245,4 +247,5 @@ Atualizar esta seção antes da entrega.
 - **Onde:** regras de negócio e seus testes (`backend/src/regras/`), utilitários e validadores (`backend/src/common/`), infraestrutura do Prisma (`backend/src/prisma/`), partes dos módulos `jogadores`, `clubes`, `mercado`, `historico`, `escalacao` e `partidas`, scripts de carga e de conferência (`backend/scripts/`), arquivos `.http` de exemplo, o frontend (`frontend/`: páginas, componentes, hooks e camada de API) e este README.
 - **Como e por quê:** para guiar a ordem das tarefas, explicar as regras do enunciado, revisar erros de migration e de tipos e gerar código de partes repetitivas ou com muitas regras de validação, ganhando tempo pois eu quero ter tempo pra refinar o resultado, logo ele ajuda muito em relação a isso.
 - **O que foi aceito, alterado ou descartado:** maior parte dos arquivos, como tem um tempo pequeno pra fazer o desafio eu poderia fazer tudo na mão mas boa parte dos arquivos grandes eu peço pro claude gerar, leio ele pra ver se a logica ta certa e aceito, alguns faço na mao principalmente quando acaba, mas leve do presuposto que a maioria tem a ia me auxiliando mais como um estagiario ao lado.
+- **Pastas de ferramentas:** as pastas `.agents`, `.claude`, `.cursor` e `.devin` em `backend/` vieram com a criação do projeto; usei apenas o Claude.
 - **Exemplos concretos de ajuste:** a migration gerada tinha erros de digitação e uma ordem errada de comandos, que corrigi; o `app.controller.spec.ts` de exemplo foi descartado; questionei a coluna `nome_normalizado` do clube e mantive depois da explicação (garante a RN10 no banco); e o roteiro automatizado encontrou o bug dos ids com zero à esquerda, que corrigi com o `ValidacaoPipe`.
