@@ -135,6 +135,16 @@ export function buscarEscalacao(clubeId: number | string) {
 export function jogarPartida(corpo: CorpoPartida) {
   return api.post<Partida>("/matches", corpo);
 }
+export function listarPartidas(clubeId?: string) {
+  return api.get<Partida[]>(
+    "/matches",
+    clubeId ? { club_id: clubeId } : undefined,
+  );
+}
+
+export function buscarPartida(id: number) {
+  return api.get<Partida>(`/matches/${id}`);
+}
 
 export function salvarEscalacao(
   clubeId: number | string,
