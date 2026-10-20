@@ -1,13 +1,10 @@
 import type { Condicao } from "@/lib/tipos";
 
-const moeda = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
+const casas = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+const moeda = new Intl.NumberFormat("pt-BR", casas);
 const variacao = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  signDisplay: "always",
+  ...casas,
+  signDisplay: "exceptZero",
 });
 const dataHora = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
@@ -18,11 +15,12 @@ const dataHora = new Intl.DateTimeFormat("pt-BR", {
   minute: "2-digit",
 });
 
-/** 261.15 -> "R$ 261,15" */
+/** 261.15 -> "261,15" (moedas fictícias, sem símbolo) */
 export const formatarMoeda = (valor: number) => moeda.format(valor);
 
-/** -38.85 -> "-R$ 38,85"; 35.7 -> "+R$ 35,70" */
-export const formatarVariacao = (valor: number) => variacao.format(valor);
+/** -38.85 -> "−38,85"; 35.7 -> "+35,70"; 0 -> "0,00" */
+export const formatarVariacao = (valor: number) =>
+  variacao.format(valor).replace("-", "−");
 
 /** "2026-10-17T11:06:29-03:00" -> "17/10/2026 11:06" (horário de Brasília) */
 export const formatarDataHora = (iso: string) => dataHora.format(new Date(iso));

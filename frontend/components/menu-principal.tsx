@@ -22,7 +22,11 @@ const GRUPOS = [
   },
 ];
 
-export function MenuPrincipal() {
+export function MenuPrincipal({
+  contagens = {},
+}: {
+  contagens?: Record<string, number>;
+}) {
   const caminho = usePathname();
   return (
     <nav className="space-y-5">
@@ -48,6 +52,11 @@ export function MenuPrincipal() {
               >
                 <Icone aria-hidden="true" className="size-4" />
                 {item.rotulo}
+                {contagens[item.href] !== undefined && (
+                  <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                    {contagens[item.href]}
+                  </span>
+                )}
               </Link>
             );
           })}

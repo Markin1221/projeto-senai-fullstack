@@ -1,5 +1,6 @@
 "use client";
 
+import { Wallet } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
 import { CampoFormulario } from "@/components/campo-formulario";
@@ -50,21 +51,35 @@ export function FormularioClube({ aoSalvar, aoFechar }: Props) {
     <form onSubmit={enviar} noValidate className="space-y-4">
       <CampoFormulario
         rotulo="Nome"
+        placeholder="Ex.: Águias FC"
         value={dados.name}
         erro={erros.name}
+        dica="De 3 a 60 caracteres. O nome não pode repetir o de outro clube."
         onChange={(e) => setDados({ ...dados, name: e.target.value })}
       />
       <CampoFormulario
-        rotulo="Sigla (3 letras)"
+        rotulo="Sigla"
+        placeholder="Ex.: AGU"
         maxLength={3}
         value={dados.acronym}
         erro={erros.acronym}
+        dica="3 letras, que não podem repetir a de outro clube. Fica em maiúsculas."
         onChange={(e) => setDados({ ...dados, acronym: e.target.value })}
       />
 
-      {erroApi && <AlertaErro mensagem={erroApi} />}
+      <p className="flex items-center gap-2 rounded-[10px] border bg-muted/50 px-3 py-2.5 text-sm text-muted-foreground">
+        <Wallet aria-hidden="true" className="size-4 shrink-0" />O clube começa
+        com 300,00 em caixa e sem jogadores.
+      </p>
 
-      <div className="flex justify-end gap-2">
+      {erroApi && (
+        <AlertaErro
+          titulo="Não foi possível criar o clube"
+          mensagem={erroApi}
+        />
+      )}
+
+      <div className="flex justify-end gap-2 border-t pt-4">
         <Button
           type="button"
           variant="outline"
@@ -74,7 +89,7 @@ export function FormularioClube({ aoSalvar, aoFechar }: Props) {
           Cancelar
         </Button>
         <Button type="submit" disabled={enviando}>
-          {enviando ? "Salvando…" : "Criar clube"}
+          {enviando ? "Criando…" : "Criar clube"}
         </Button>
       </div>
     </form>

@@ -126,6 +126,8 @@ export default function PaginaClubes() {
       <Modal
         aberto={criando}
         titulo="Novo clube"
+        descricao="Dê um nome e uma sigla de 3 letras ao clube."
+        largura="max-w-[480px]"
         aoFechar={() => setCriando(false)}
       >
         <FormularioClube
