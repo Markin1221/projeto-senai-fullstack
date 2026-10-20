@@ -142,7 +142,8 @@ backend/
     partidas/               partidas, duelos, histórico de partidas e classificação
 frontend/
   app/                      páginas (App Router): jogadores, clubes, clubes/[id], partidas e classificação
-  components/               componentes compartilhados (tabela, campos, modal, formulários)
+  components/               componentes compartilhados (tabela, campos, modal, formulários,
+                            histórico de transações, escalação, duelos e histórico de partidas)
   components/ui/            componentes base do shadcn/ui
   hooks/                    useDados (carregamento), useEnvio (envio sem clique duplo), useDebounce
   lib/                      cliente da API, tipos, formatação, filtros e validações dos formulários
@@ -189,8 +190,9 @@ frontend/
 | Frontend: cadastro, edição, alteração de condição e exclusão de jogador         | Pronto   |
 | Frontend: lista e criação de clubes; página do clube com elenco e contratos     | Pronto   |
 | Frontend: compra e venda                                                        | Pronto   |
-| Frontend: histórico de transações e exportação CSV                              | A fazer  |
-| Frontend: escalação, partidas, histórico de partidas e classificação            | A fazer  |
+| Frontend: histórico de transações e exportação CSV                              | Pronto   |
+| Frontend: escalação do clube, com aviso de escalação incompleta                 | Pronto   |
+| Frontend: partidas com placar e 6 duelos, histórico de partidas e classificação | Pronto   |
 
 ## 7. Decisões e premissas
 
@@ -216,10 +218,13 @@ frontend/
 - **Mensagens e validação nas telas:** toda recusa da API mostra o `message` dela. Os formulários validam antes de enviar os campos obrigatórios e os limites de um campo só (por exemplo, idade de 16 a 45); as regras que cruzam campos (como a soma dos atributos) ficam na API.
 - **Formulários em modal:** os formulários e as confirmações usam o elemento `<dialog>` nativo. Como o modal cobre a tela, os erros da API aparecem dentro dele.
 - **Data e hora da compra:** a tela usa um campo de data e hora local e envia `AAAA-MM-DDTHH:MM-03:00`, o formato da API.
+- **Histórico no frontend:** a aba "Histórico" da página do clube filtra por tipo e jogador, mostra os totais (`summary`) da API para o mesmo filtro e baixa o CSV que a API gera (`GET /clubs/{id}/transactions/export`), com o nome `historico de (clube)`. A tela não monta o CSV.
+- **Escalação no frontend:** a aba "Escalação" oferece só jogadores do elenco que não estão `DOENTE` e que cabem na posição de cada vaga da formação escolhida. Quem decide se a escalação é válida continua sendo a API (409 com `message`). Escalação incompleta mostra um aviso de que o clube não pode jogar.
+- **Partidas no frontend:** o resultado e os 6 duelos vêm prontos da API. O histórico de partidas filtra por clube e abre os duelos de cada partida; a classificação mostra a ordem devolvida pela API, sem reordenar.
 
 ## 8. Funcionalidades não implementadas
 
-- **Frontend, em andamento:** histórico de transações com exportação CSV, escalação, partidas, histórico de partidas e classificação.
+- **Frontend:** nenhuma funcionalidade obrigatória pendente. Não há testes automatizados no frontend nem layout para celular.
 - **Diferenciais do backend:** documentação interativa (Swagger) e Docker Compose da aplicação completa (hoje o Compose sobe só o banco).
 
 Atualizar esta seção antes da entrega.
