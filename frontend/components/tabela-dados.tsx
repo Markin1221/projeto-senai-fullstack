@@ -1,6 +1,9 @@
 "use client";
 
+import { ServerOff, SearchX } from "lucide-react";
 import type { ReactNode } from "react";
+import { EstadoCentral } from "@/components/estado-central";
+import { Button } from "@/components/ui/button";
 import { AlertaErro } from "@/components/alerta-erro";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,14 +21,23 @@ export interface Coluna<T> {
   numerica?: boolean;
 }
 
+export interface EstadoVazio {
+  titulo: string;
+  descricao: string;
+  icone?: ReactNode;
+  acao?: ReactNode;
+}
+
 interface Props<T> {
   colunas: Coluna<T>[];
   linhas?: T[];
   carregando: boolean;
   erro?: string | null;
-  vazio: string;
+  vazio: string | EstadoVazio;
+  tituloErro?: string;
   chave: (linha: T) => string | number;
   aoTentarDeNovo?: () => void;
+  semBorda?: boolean;
 }
 
 export function TabelaDados<T>({
@@ -34,15 +46,52 @@ export function TabelaDados<T>({
   carregando,
   erro,
   vazio,
+  tituloErro,
   chave,
   aoTentarDeNovo,
+  semBorda = false,
 }: Props<T>) {
+  const moldura = semBorda
+    ? undefined
+    : "overflow-hidden rounded-xl border bg-card";
+
   if (erro) {
-    return <AlertaErro mensagem={erro} aoTentarDeNovo={aoTentarDeNovo} />;
+    if (!tituloErro) {
+      return <AlertaErro mensagem={erro} aoTentarDeNovo={aoTentarDeNovo} />;
+    }
+    return (
+      <div className={moldura}>
+        <EstadoCentral
+          icone={<ServerOff />}
+          titulo={tituloErro}
+          descricao={erro}
+        >
+          {aoTentarDeNovo && (
+            <Button variant="outline" onClick={aoTentarDeNovo}>
+              Tentar de novo
+            </Button>
+          )}
+        </EstadoCentral>
+      </div>
+    );
+  }
+
+  if (!carregando && linhas?.length === 0 && typeof vazio !== "string") {
+    return (
+      <div className={moldura}>
+        <EstadoCentral
+          icone={vazio.icone ?? <SearchX />}
+          titulo={vazio.titulo}
+          descricao={vazio.descricao}
+        >
+          {vazio.acao}
+        </EstadoCentral>
+      </div>
+    );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
+    <div className={moldura}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -73,7 +122,7 @@ export function TabelaDados<T>({
                 colSpan={colunas.length}
                 className="py-8 text-center text-muted-foreground"
               >
-                {vazio}
+                {typeof vazio === "string" ? vazio : vazio.titulo}
               </TableCell>
             </TableRow>
           )}

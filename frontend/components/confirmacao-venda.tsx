@@ -1,27 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { Check, HandCoins, TriangleAlert } from "lucide-react";
+import { useCallback, useState, type ReactNode } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
+import { AvisoInformativo } from "@/components/aviso-informativo";
+import { ResumoJogador } from "@/components/resumo-jogador";
 import { Button } from "@/components/ui/button";
+import { useDados } from "@/hooks/use-dados";
 import { useEnvio } from "@/hooks/use-envio";
-import { mensagemDeErro, venderJogador } from "@/lib/api";
+import { buscarEscalacao, mensagemDeErro, venderJogador } from "@/lib/api";
 import {
   formatarDataHora,
   formatarMoeda,
   formatarVariacao,
 } from "@/lib/formatar";
 import type { JogadorDoElenco, ResultadoVenda } from "@/lib/tipos";
+import { cn } from "@/lib/utils";
 
 interface Props {
   jogador: JogadorDoElenco;
+  nomeDoClube?: string;
   aoSalvar: () => void;
   aoFechar: () => void;
 }
 
-export function ConfirmacaoVenda({ jogador, aoSalvar, aoFechar }: Props) {
+function Linha({ rotulo, children }: { rotulo: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between px-4 py-2.5 text-sm">
+      <dt className="text-muted-foreground">{rotulo}</dt>
+      <dd className="font-medium tabular-nums">{children}</dd>
+    </div>
+  );
+}
+
+function PilulaTaxa({ taxa }: { taxa: number }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium",
+        taxa === 0
+          ? "border-success-soft-border bg-success-soft text-success-soft-foreground"
+          : "border-warning-soft-border bg-warning-soft text-warning-soft-foreground",
+      )}
+    >
+      {taxa === 0 && <Check aria-hidden="true" className="size-3" />}
+      {taxa}%
+    </span>
+  );
+}
+
+export function ConfirmacaoVenda({
+  jogador,
+  nomeDoClube,
+  aoSalvar,
+  aoFechar,
+}: Props) {
   const [erroApi, setErroApi] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoVenda | null>(null);
   const { enviando, executar } = useEnvio();
+
+  const carregarEscalacao = useCallback(
+    () =>
+      jogador.club_id === null
+        ? Promise.resolve(null)
+        : buscarEscalacao(jogador.club_id),
+    [jogador.club_id],
+  );
+  const { dados: escalacao } = useDados(carregarEscalacao);
+  const titular = escalacao?.players.some((p) => p.id === jogador.id) ?? false;
 
   const vender = async () => {
     setErroApi(null);
@@ -38,50 +84,37 @@ export function ConfirmacaoVenda({ jogador, aoSalvar, aoFechar }: Props) {
   if (resultado) {
     return (
       <div className="space-y-4">
-        <p className="text-sm">
-          Venda de <strong>{resultado.player_name}</strong> concluída.
+        <p className="flex items-center gap-2 rounded-[10px] border border-success-soft-border bg-success-soft p-3 text-sm text-success-soft-foreground">
+          <Check aria-hidden="true" className="size-4 shrink-0" />
+          <span>
+            Venda de <strong>{resultado.player_name}</strong> concluída.
+          </span>
         </p>
-        <dl className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <dt className="text-muted-foreground">Valor de compra</dt>
-            <dd>{formatarMoeda(resultado.purchase_value)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Valor de venda</dt>
-            <dd>{formatarMoeda(resultado.value)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Dias restantes</dt>
-            <dd>{resultado.remaining_days}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">
-              Multa ({resultado.penalty_rate}%)
-            </dt>
-            <dd>{formatarMoeda(resultado.penalty)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Lucro</dt>
-            <dd>{formatarVariacao(resultado.profit)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Comissão</dt>
-            <dd>{formatarMoeda(resultado.fee)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Crédito no caixa</dt>
-            <dd>{formatarMoeda(resultado.cash_change)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Novo caixa</dt>
-            <dd>{formatarMoeda(resultado.club_cash)}</dd>
-            <div className="col-span-2">
-              <dt className="text-muted-foreground">Contrato</dt>
-              <dd>{resultado.contract_status}</dd>
-            </div>
-          </div>
+        <dl className="divide-y rounded-[10px] border">
+          <Linha rotulo="Valor de compra">
+            {formatarMoeda(resultado.purchase_value)}
+          </Linha>
+          <Linha rotulo="Valor de venda">
+            {formatarMoeda(resultado.value)}
+          </Linha>
+          <Linha rotulo="Dias restantes">{resultado.remaining_days}</Linha>
+          <Linha rotulo="Multa">
+            <span className="mr-2">
+              <PilulaTaxa taxa={resultado.penalty_rate} />
+            </span>
+            {formatarMoeda(resultado.penalty)}
+          </Linha>
+          <Linha rotulo="Lucro">{formatarVariacao(resultado.profit)}</Linha>
+          <Linha rotulo="Comissão">{formatarMoeda(resultado.fee)}</Linha>
+          <Linha rotulo="Crédito no caixa">
+            {formatarMoeda(resultado.cash_change)}
+          </Linha>
+          <Linha rotulo="Novo caixa">
+            {formatarMoeda(resultado.club_cash)}
+          </Linha>
+          <Linha rotulo="Contrato">{resultado.contract_status}</Linha>
         </dl>
-        <div className="flex justify-end">
+        <div className="flex justify-end border-t pt-4">
           <Button onClick={aoFechar}>Fechar</Button>
         </div>
       </div>
@@ -90,54 +123,53 @@ export function ConfirmacaoVenda({ jogador, aoSalvar, aoFechar }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        O jogador sai do elenco e volta a ficar livre.
-      </p>
+      {titular && (
+        <div
+          role="status"
+          className="flex gap-3 rounded-[10px] border border-warning-soft-border bg-warning-soft p-3 text-sm text-warning-soft-foreground"
+        >
+          <TriangleAlert
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0"
+          />
+          <div>
+            <p className="font-medium">{jogador.name} é titular</p>
+            <p>
+              Ao vender, ele sai da escalação, e o {nomeDoClube ?? "clube"} só
+              volta a jogar partidas depois de escalar de novo os 5 titulares.
+            </p>
+          </div>
+        </div>
+      )}
 
-      <div className="flex items-center justify-between rounded-lg border p-3">
-        <div>
-          <p className="font-medium">{jogador.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {jogador.position} · {jogador.age} anos
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Valor de mercado</p>
-          <p className="font-semibold">{formatarMoeda(jogador.market_value)}</p>
-        </div>
-      </div>
+      <ResumoJogador jogador={jogador} />
 
-      <dl className="divide-y rounded-lg border text-sm">
-        <div className="flex justify-between p-3">
-          <dt className="text-muted-foreground">Valor de compra</dt>
-          <dd>{formatarMoeda(jogador.contract.purchase_value)}</dd>
-        </div>
-        <div className="flex justify-between p-3">
-          <dt className="text-muted-foreground">Fim da fidelidade</dt>
-          <dd>{formatarDataHora(jogador.contract.loyalty_until)}</dd>
-        </div>
-        <div className="flex justify-between p-3">
-          <dt className="text-muted-foreground">Dias restantes</dt>
-          <dd>{jogador.contract.remaining_days}</dd>
-        </div>
-        <div className="flex justify-between p-3">
-          <dt className="text-muted-foreground">% de multa se vender agora</dt>
-          <dd>{jogador.contract.penalty_rate}%</dd>
-        </div>
+      <dl className="divide-y rounded-[10px] border">
+        <Linha rotulo="Valor de compra">
+          {formatarMoeda(jogador.contract.purchase_value)}
+        </Linha>
+        <Linha rotulo="Fim da fidelidade">
+          {formatarDataHora(jogador.contract.loyalty_until)}
+        </Linha>
+        <Linha rotulo="Dias restantes">{jogador.contract.remaining_days}</Linha>
+        <Linha rotulo="% de multa se vender agora">
+          <PilulaTaxa taxa={jogador.contract.penalty_rate} />
+        </Linha>
       </dl>
 
-      <p className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+      <AvisoInformativo>
         A venda é pelo valor de mercado do momento. Multa (teto de 10,00),
         lucro, comissão e crédito são calculados ao confirmar.
-      </p>
+      </AvisoInformativo>
 
       {erroApi && <AlertaErro mensagem={erroApi} />}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 border-t pt-4">
         <Button variant="outline" onClick={aoFechar} disabled={enviando}>
           Cancelar
         </Button>
         <Button onClick={vender} disabled={enviando}>
+          <HandCoins aria-hidden="true" />
           {enviando ? "Vendendo…" : "Confirmar venda"}
         </Button>
       </div>

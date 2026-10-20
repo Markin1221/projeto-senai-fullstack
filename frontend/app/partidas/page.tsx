@@ -1,5 +1,7 @@
 "use client";
 
+import { Swords } from "lucide-react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { useCallback, useState } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
 import { DuelosPartida } from "@/components/duelos-partida";
@@ -17,7 +19,11 @@ export default function PaginaPartidas() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Partidas</h1>
+      <CabecalhoPagina
+        icone={Swords}
+        titulo="Partidas"
+        descricao="Jogue uma partida entre dois clubes e consulte o histórico."
+      />
 
       {erro ? (
         <AlertaErro mensagem={erro} aoTentarDeNovo={recarregar} />

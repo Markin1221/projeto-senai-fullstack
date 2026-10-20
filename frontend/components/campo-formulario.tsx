@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 interface Props extends ComponentProps<typeof Input> {
   rotulo: string;
   erro?: string;
+  dica?: string;
 }
 
-export function CampoFormulario({ rotulo, erro, ...entrada }: Props) {
+export function CampoFormulario({ rotulo, erro, dica, ...entrada }: Props) {
   const id = useId();
   return (
     <div className="space-y-1.5">
@@ -20,6 +21,7 @@ export function CampoFormulario({ rotulo, erro, ...entrada }: Props) {
         aria-describedby={erro ? `${id}-erro` : undefined}
         {...entrada}
       />
+      {!erro && dica && <p className="text-xs text-muted-foreground">{dica}</p>}
       {erro && (
         <p id={`${id}-erro`} className="text-sm text-destructive">
           {erro}

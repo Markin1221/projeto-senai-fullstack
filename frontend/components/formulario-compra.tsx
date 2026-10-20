@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Calendar, Clock, ShoppingCart, Shield } from "lucide-react";
+import { useId, useState, type FormEvent } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
-import { CampoFormulario } from "@/components/campo-formulario";
+import { AvisoInformativo } from "@/components/aviso-informativo";
 import { CampoSelect, type OpcaoSelect } from "@/components/campo-select";
+import { ResumoJogador } from "@/components/resumo-jogador";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useEnvio } from "@/hooks/use-envio";
 import { comprarJogador, mensagemDeErro } from "@/lib/api";
 import {
@@ -29,10 +33,13 @@ export function FormularioCompra({
   aoSalvar,
   aoFechar,
 }: Props) {
-  const [dados, setDados] = useState<DadosFormularioCompra>({
-    clube: "",
-    fidelidade: "",
-  });
+  const [clube, setClube] = useState("");
+  const [data, setData] = useState("");
+  const [hora, setHora] = useState("");
+  const idData = useId();
+  const idHora = useId();
+  const fidelidade = data && hora ? `${data}T${hora}` : "";
+  const dados: DadosFormularioCompra = { clube, fidelidade };
   const [erros, setErros] = useState<ErrosCompra>({});
   const [erroApi, setErroApi] = useState<string | null>(null);
   const [resultado, setResultado] = useState<ResultadoCompra | null>(null);
@@ -40,8 +47,12 @@ export function FormularioCompra({
 
   const opcoesClube: OpcaoSelect[] = [
     { valor: "", rotulo: "Escolha um clube" },
-    ...clubes.map((c) => ({ valor: String(c.id), rotulo: c.name })),
+    ...clubes.map((c) => ({
+      valor: String(c.id),
+      rotulo: `${c.name} (${c.acronym}) · caixa ${formatarMoeda(c.cash)}`,
+    })),
   ];
+  const clubeEscolhido = clubes.find((c) => String(c.id) === clube);
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
@@ -99,27 +110,71 @@ export function FormularioCompra({
 
   return (
     <form onSubmit={enviar} noValidate className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {jogador.name} · valor de mercado {formatarMoeda(jogador.market_value)}
-      </p>
+      <ResumoJogador jogador={jogador} />
       <CampoSelect
-        rotulo="Clube"
+        rotulo="Clube comprador"
+        icone={<Shield aria-hidden="true" className="size-4" />}
         opcoes={opcoesClube}
-        value={dados.clube}
+        value={clube}
         erro={erros.clube}
-        onChange={(e) => setDados({ ...dados, clube: e.target.value })}
+        dica={
+          clubeEscolhido
+            ? `Caixa atual: ${formatarMoeda(clubeEscolhido.cash)}. O custo total (valor + taxa) pode ir até 50% do caixa.`
+            : undefined
+        }
+        onChange={(e) => setClube(e.target.value)}
       />
-      <CampoFormulario
-        rotulo="Fim da fidelidade (horário de Brasília)"
-        type="datetime-local"
-        value={dados.fidelidade}
-        erro={erros.fidelidade}
-        onChange={(e) => setDados({ ...dados, fidelidade: e.target.value })}
-      />
+      <div className="space-y-1.5">
+        <Label htmlFor={idData}>Fim da fidelidade</Label>
+        <div className="grid grid-cols-[1fr_8rem] gap-3">
+          <div className="relative">
+            <Calendar
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              id={idData}
+              type="date"
+              className="pl-9"
+              value={data}
+              aria-invalid={Boolean(erros.fidelidade)}
+              onChange={(e) => setData(e.target.value)}
+            />
+          </div>
+          <div className="relative">
+            <Clock
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              id={idHora}
+              type="time"
+              aria-label="Hora do fim da fidelidade"
+              className="pl-9"
+              value={hora}
+              aria-invalid={Boolean(erros.fidelidade)}
+              onChange={(e) => setHora(e.target.value)}
+            />
+          </div>
+        </div>
+        {erros.fidelidade ? (
+          <p className="text-sm text-destructive">{erros.fidelidade}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Depois do momento da compra e até 1.095 dias. Horário de Brasília;
+            enviado com o fuso (-03:00).
+          </p>
+        )}
+      </div>
+
+      <AvisoInformativo>
+        A taxa é de 5% do valor de mercado, só quando ele passa de 30,00. Taxa,
+        custo e novo caixa são calculados ao confirmar.
+      </AvisoInformativo>
 
       {erroApi && <AlertaErro mensagem={erroApi} />}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 border-t pt-4">
         <Button
           type="button"
           variant="outline"
@@ -129,7 +184,8 @@ export function FormularioCompra({
           Cancelar
         </Button>
         <Button type="submit" disabled={enviando}>
-          {enviando ? "Comprando…" : "Comprar"}
+          <ShoppingCart aria-hidden="true" />
+          {enviando ? "Comprando…" : "Confirmar compra"}
         </Button>
       </div>
     </form>

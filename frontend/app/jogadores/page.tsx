@@ -1,15 +1,13 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { CampoFormulario } from "@/components/campo-formulario";
-import { CampoSelect, type OpcaoSelect } from "@/components/campo-select";
+import type { OpcaoSelect } from "@/components/campo-select";
 import { DialogoConfirmacao } from "@/components/dialogo-confirmacao";
 import { FormularioCondicao } from "@/components/formulario-condicao";
 import { FormularioJogador } from "@/components/formulario-jogador";
 import { Modal } from "@/components/modal";
 import { Paginacao } from "@/components/paginacao";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useDados } from "@/hooks/use-dados";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -25,13 +23,38 @@ import {
   consultaDeFiltros,
   type FiltrosJogadores,
 } from "@/lib/filtros-jogadores";
-import { formatarMoeda, rotuloCondicao } from "@/lib/formatar";
+import { NOMES_POSICAO, formatarMoeda } from "@/lib/formatar";
+import {
+  ArrowUpDown,
+  Coins,
+  HeartPulse,
+  Plus,
+  Search,
+  Shield,
+  Shirt,
+  ShoppingCart,
+  User,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { AbasSegmentadas } from "@/components/abas-segmentadas";
+import { AvatarIniciais } from "@/components/avatar-iniciais";
+import { BarraAtributo } from "@/components/barra-atributo";
+import { FiltroFaixa } from "@/components/filtro-faixa";
+import { PainelJogador } from "@/components/painel-jogador";
+import { MenuAcoesJogador } from "@/components/menu-acoes-jogador";
+import { FiltroSelect } from "@/components/filtro-select";
+import { Input } from "@/components/ui/input";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
+import { SeloCondicao } from "@/components/selo-condicao";
+import { SeloPosicao } from "@/components/selo-posicao";
 import type { Jogador } from "@/lib/tipos";
 import { FormularioCompra } from "@/components/formulario-compra";
 
 const carregarClubes = () => listarClubes();
 
 interface Acoes {
+  detalhes: (jogador: Jogador) => void;
   editar: (jogador: Jogador) => void;
   condicao: (jogador: Jogador) => void;
   excluir: (jogador: Jogador) => void;
@@ -39,22 +62,44 @@ interface Acoes {
 }
 
 function criarColunas(
-  nomesDosClubes: Map<number, string>,
+  clubesPorId: Map<number, { name: string; acronym: string }>,
   acoes: Acoes,
 ): Coluna<Jogador>[] {
   return [
-    { titulo: "Nome", celula: (j) => j.name },
-    { titulo: "Posição", celula: (j) => j.position },
-    { titulo: "Overall", celula: (j) => j.overall, numerica: true },
-    { titulo: "Agilidade", celula: (j) => j.agility, numerica: true },
+    {
+      titulo: "Jogador",
+      celula: (j) => (
+        <div className="flex items-center gap-3">
+          <AvatarIniciais nome={j.name} id={j.id} />
+          <div className="leading-tight">
+            <p className="font-medium">{j.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {NOMES_POSICAO[j.position]}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    { titulo: "Posição", celula: (j) => <SeloPosicao posicao={j.position} /> },
+    {
+      titulo: "Overall",
+      celula: (j) => <strong>{j.overall}</strong>,
+      numerica: true,
+    },
+    {
+      titulo: "Agilidade",
+      celula: (j) => (
+        <span className="inline-flex items-center gap-2">
+          {j.agility}
+          <BarraAtributo valor={j.agility} />
+        </span>
+      ),
+      numerica: true,
+    },
     { titulo: "Idade", celula: (j) => j.age, numerica: true },
     {
       titulo: "Condição",
-      celula: (j) => (
-        <Badge variant={j.condition === "APTO" ? "secondary" : "outline"}>
-          {rotuloCondicao(j.condition)}
-        </Badge>
-      ),
+      celula: (j) => <SeloCondicao condicao={j.condition} />,
     },
     {
       titulo: "Valor base",
@@ -68,35 +113,53 @@ function criarColunas(
     },
     {
       titulo: "Clube",
-      celula: (j) =>
-        j.club_id === null
-          ? "Livre"
-          : (nomesDosClubes.get(j.club_id) ?? `#${j.club_id}`),
+      celula: (j) => {
+        if (j.club_id === null) {
+          return (
+            <span className="rounded-md border bg-muted px-2 py-0.5 text-xs font-medium">
+              Livre
+            </span>
+          );
+        }
+        const clube = clubesPorId.get(j.club_id);
+        return (
+          <span className="inline-flex items-center gap-2">
+            <span className="rounded-md border px-1.5 py-0.5 text-xs font-semibold">
+              {clube?.acronym ?? "—"}
+            </span>
+            <Link
+              href={`/clubes/${j.club_id}`}
+              className="underline underline-offset-4"
+            >
+              {clube?.name ?? `#${j.club_id}`}
+            </Link>
+          </span>
+        );
+      },
     },
     {
       titulo: "Ações",
       celula: (j) => (
-        <div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={() => acoes.editar(j)}>
-            Editar
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => acoes.condicao(j)}>
-            Condição
-          </Button>
+        <div className="flex items-center justify-end gap-2">
           {j.club_id === null && (
-            <>
-              <Button size="sm" onClick={() => acoes.comprar(j)}>
-                Comprar
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => acoes.excluir(j)}
-              >
-                Excluir
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => acoes.comprar(j)}
+            >
+              <ShoppingCart aria-hidden="true" className="size-4" />
+              Comprar
+            </Button>
           )}
+          <MenuAcoesJogador
+            nome={j.name}
+            livre={j.club_id === null}
+            aoVerDetalhes={() => acoes.detalhes(j)}
+            aoEditar={() => acoes.editar(j)}
+            aoAlterarCondicao={() => acoes.condicao(j)}
+            aoComprar={() => acoes.comprar(j)}
+            aoExcluir={() => acoes.excluir(j)}
+          />
         </div>
       ),
     },
@@ -110,6 +173,7 @@ export default function PaginaJogadores() {
   const [condicaoDe, setCondicaoDe] = useState<Jogador | null>(null);
   const [paraExcluir, setParaExcluir] = useState<Jogador | null>(null);
   const [comprarDe, setComprarDe] = useState<Jogador | null>(null);
+  const [detalhe, setDetalhe] = useState<Jogador | null>(null);
   const { enviando: excluindo, executar: executarExclusao } = useEnvio();
 
   const pedido = useMemo(() => ({ filtros, pagina }), [filtros, pagina]);
@@ -125,12 +189,16 @@ export default function PaginaJogadores() {
   const { dados, carregando, erro, recarregar } = useDados(carregar);
   const { dados: clubes } = useDados(carregarClubes);
 
-  const nomesDosClubes = useMemo(
-    () => new Map((clubes ?? []).map((c) => [c.id, c.name])),
+  const clubesPorId = useMemo(
+    () =>
+      new Map(
+        (clubes ?? []).map((c) => [c.id, { name: c.name, acronym: c.acronym }]),
+      ),
     [clubes],
   );
   const acoes = useMemo<Acoes>(
     () => ({
+      detalhes: setDetalhe,
       editar: (jogador) => setCadastro({ jogador }),
       condicao: setCondicaoDe,
       excluir: setParaExcluir,
@@ -139,8 +207,8 @@ export default function PaginaJogadores() {
     [],
   );
   const colunas = useMemo(
-    () => criarColunas(nomesDosClubes, acoes),
-    [nomesDosClubes, acoes],
+    () => criarColunas(clubesPorId, acoes),
+    [clubesPorId, acoes],
   );
   const opcoesClube = useMemo<OpcaoSelect[]>(
     () => [
@@ -173,86 +241,106 @@ export default function PaginaJogadores() {
     setParaExcluir(null);
   };
 
+  const filtrado = Object.entries(filtros).some(
+    ([chave, valor]) =>
+      chave !== "ordem" &&
+      chave !== "pagina" &&
+      valor !== (FILTROS_INICIAIS as unknown as Record<string, unknown>)[chave],
+  );
+
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Jogadores</h1>
-        <Button onClick={() => setCadastro({})}>Novo jogador</Button>
-      </div>
+      <CabecalhoPagina
+        icone={Users}
+        titulo="Jogadores"
+        descricao="Cadastre jogadores, acompanhe os indicadores e compre os que estão livres."
+      >
+        <Button onClick={() => setCadastro({})}>
+          <Plus aria-hidden="true" className="size-4" />
+          Novo jogador
+        </Button>
+      </CabecalhoPagina>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <CampoFormulario
-          rotulo="Buscar por nome"
-          value={filtros.busca}
-          onChange={(e) => alterar({ busca: e.target.value })}
-        />
-        <CampoSelect
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/30 p-2">
+        <div className="relative min-w-56 flex-1">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            aria-label="Buscar por nome"
+            placeholder="Buscar por nome"
+            className="h-9 bg-card pl-9"
+            value={filtros.busca}
+            onChange={(e) => alterar({ busca: e.target.value })}
+          />
+        </div>
+        <FiltroSelect
+          icone={Shirt}
           rotulo="Posição"
           opcoes={OPCOES_POSICAO}
           value={filtros.posicao}
           onChange={(e) => alterar({ posicao: e.target.value })}
         />
-        <CampoSelect
+        <FiltroSelect
+          icone={HeartPulse}
           rotulo="Condição"
           opcoes={OPCOES_CONDICAO}
           value={filtros.condicao}
           onChange={(e) => alterar({ condicao: e.target.value })}
         />
-        <CampoSelect
-          rotulo="Situação"
-          opcoes={OPCOES_SITUACAO}
-          value={filtros.situacao}
-          onChange={(e) =>
-            alterar({
-              situacao: e.target.value as FiltrosJogadores["situacao"],
-              clube: e.target.value === "livres" ? "" : filtros.clube,
-            })
-          }
-        />
-        <CampoSelect
+        <FiltroSelect
+          icone={Shield}
           rotulo="Clube"
           opcoes={opcoesClube}
           value={filtros.clube}
           disabled={apenasLivres}
           onChange={(e) => alterar({ clube: e.target.value })}
         />
-        <CampoFormulario
-          rotulo="Idade mínima"
-          type="number"
-          value={filtros.idadeMin}
-          onChange={(e) => alterar({ idadeMin: e.target.value })}
+        <FiltroFaixa
+          icone={User}
+          rotulo="Idade"
+          minimo={filtros.idadeMin}
+          maximo={filtros.idadeMax}
+          aoMudarMinimo={(v) => alterar({ idadeMin: v })}
+          aoMudarMaximo={(v) => alterar({ idadeMax: v })}
         />
-        <CampoFormulario
-          rotulo="Idade máxima"
-          type="number"
-          value={filtros.idadeMax}
-          onChange={(e) => alterar({ idadeMax: e.target.value })}
+        <FiltroFaixa
+          icone={Coins}
+          rotulo="Valor de mercado"
+          passo="0.01"
+          minimo={filtros.valorMin}
+          maximo={filtros.valorMax}
+          aoMudarMinimo={(v) => alterar({ valorMin: v })}
+          aoMudarMaximo={(v) => alterar({ valorMax: v })}
         />
-        <CampoSelect
+        <Button variant="ghost" onClick={() => alterar(FILTROS_INICIAIS)}>
+          Limpar filtros
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <AbasSegmentadas
+          opcoes={OPCOES_SITUACAO}
+          valor={filtros.situacao}
+          aoMudar={(valor) =>
+            alterar({
+              situacao: valor as FiltrosJogadores["situacao"],
+              clube: valor === "livres" ? "" : filtros.clube,
+            })
+          }
+        />
+        <FiltroSelect
+          icone={ArrowUpDown}
           rotulo="Ordenar por"
-          opcoes={OPCOES_ORDEM}
+          comoPlaceholder={false}
+          opcoes={OPCOES_ORDEM.map((o) => ({
+            ...o,
+            rotulo: `Ordenar: ${o.rotulo}`,
+          }))}
           value={filtros.ordem}
           onChange={(e) => alterar({ ordem: e.target.value })}
         />
-        <CampoFormulario
-          rotulo="Valor mínimo (R$)"
-          type="number"
-          step="0.01"
-          value={filtros.valorMin}
-          onChange={(e) => alterar({ valorMin: e.target.value })}
-        />
-        <CampoFormulario
-          rotulo="Valor máximo (R$)"
-          type="number"
-          step="0.01"
-          value={filtros.valorMax}
-          onChange={(e) => alterar({ valorMax: e.target.value })}
-        />
-        <div className="flex items-end">
-          <Button variant="outline" onClick={() => alterar(FILTROS_INICIAIS)}>
-            Limpar filtros
-          </Button>
-        </div>
       </div>
 
       <TabelaDados
@@ -260,7 +348,34 @@ export default function PaginaJogadores() {
         linhas={dados?.data}
         carregando={carregando}
         erro={erro}
-        vazio="Nenhum jogador encontrado com esses filtros."
+        tituloErro="Não foi possível carregar os jogadores"
+        vazio={
+          filtrado
+            ? {
+                titulo: "Nenhum jogador encontrado",
+                descricao:
+                  "Nenhum jogador bate com os filtros escolhidos. Ajuste ou limpe os filtros.",
+                acao: (
+                  <Button
+                    variant="outline"
+                    onClick={() => alterar(FILTROS_INICIAIS)}
+                  >
+                    Limpar filtros
+                  </Button>
+                ),
+              }
+            : {
+                titulo: "Nenhum jogador cadastrado",
+                descricao: "Com o banco recém-criado, a lista começa vazia.",
+                icone: <Users />,
+                acao: (
+                  <Button onClick={() => setCadastro({})}>
+                    <Plus aria-hidden="true" className="size-4" />
+                    Novo jogador
+                  </Button>
+                ),
+              }
+        }
         chave={(j) => j.id}
         aoTentarDeNovo={recarregar}
       />
@@ -278,6 +393,12 @@ export default function PaginaJogadores() {
       <Modal
         aberto={cadastro !== null}
         titulo={cadastro?.jogador ? "Editar jogador" : "Novo jogador"}
+        descricao={
+          cadastro?.jogador
+            ? undefined
+            : "Preencha os dados e os indicadores técnicos. O valor base, o overall e o valor de mercado são calculados ao salvar."
+        }
+        largura="max-w-4xl"
         aoFechar={() => setCadastro(null)}
       >
         <FormularioJogador
@@ -288,13 +409,49 @@ export default function PaginaJogadores() {
       </Modal>
 
       <Modal
+        aberto={detalhe !== null}
+        titulo="Detalhes do jogador"
+        lateral
+        aoFechar={() => setDetalhe(null)}
+      >
+        {detalhe && (
+          <PainelJogador
+            jogador={detalhe}
+            nomeDoClube={
+              detalhe.club_id === null
+                ? undefined
+                : clubesPorId.get(detalhe.club_id)?.name
+            }
+            aoEditar={() => {
+              setDetalhe(null);
+              setCadastro({ jogador: detalhe });
+            }}
+            aoAlterarCondicao={() => {
+              setDetalhe(null);
+              setCondicaoDe(detalhe);
+            }}
+            aoComprar={() => {
+              setDetalhe(null);
+              setComprarDe(detalhe);
+            }}
+          />
+        )}
+      </Modal>
+
+      <Modal
         aberto={condicaoDe !== null}
-        titulo="Alterar condição"
+        titulo="Alterar condição física"
+        descricao="A condição muda o desconto do valor de mercado, recalculado ao salvar."
         aoFechar={() => setCondicaoDe(null)}
       >
         {condicaoDe && (
           <FormularioCondicao
             jogador={condicaoDe}
+            nomeDoClube={
+              condicaoDe.club_id === null
+                ? undefined
+                : clubesPorId.get(condicaoDe.club_id)?.name
+            }
             aoSalvar={recarregar}
             aoFechar={() => setCondicaoDe(null)}
           />
@@ -303,6 +460,8 @@ export default function PaginaJogadores() {
       <Modal
         aberto={comprarDe !== null}
         titulo="Comprar jogador"
+        descricao="Escolha o clube comprador e até quando vai a fidelidade do contrato."
+        largura="max-w-[560px]"
         aoFechar={() => setComprarDe(null)}
       >
         {comprarDe && (

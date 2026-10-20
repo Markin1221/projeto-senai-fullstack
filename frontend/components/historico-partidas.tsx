@@ -1,5 +1,6 @@
 "use client";
 
+import { Swords } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { DetalhePartida } from "@/components/detalhe-partida";
 import { Modal } from "@/components/modal";
@@ -78,7 +79,13 @@ export function HistoricoPartidas({ clubes, versao }: Props) {
         carregando={carregando}
         erro={erro}
         aoTentarDeNovo={recarregar}
-        vazio="Nenhuma partida jogada ainda."
+        tituloErro="Não foi possível carregar as partidas"
+        vazio={{
+          titulo: "Nenhuma partida jogada",
+          descricao:
+            "Escale os 5 titulares de dois clubes e jogue a primeira partida.",
+          icone: <Swords />,
+        }}
         chave={(p) => p.id}
       />
 

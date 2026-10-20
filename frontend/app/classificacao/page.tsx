@@ -1,5 +1,7 @@
 "use client";
 
+import { ListOrdered } from "lucide-react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { useCallback, useMemo } from "react";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
 import { useDados } from "@/hooks/use-dados";
@@ -32,14 +34,24 @@ export default function PaginaClassificacao() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Classificação</h1>
+      <CabecalhoPagina
+        icone={ListOrdered}
+        titulo="Classificação"
+        descricao="Tabela da liga, calculada a cada consulta."
+      />
       <TabelaDados
         colunas={colunas}
         linhas={dados ?? undefined}
         carregando={carregando}
         erro={erro}
         aoTentarDeNovo={recarregar}
-        vazio="Nenhum clube cadastrado ainda."
+        tituloErro="Não foi possível carregar a classificação"
+        vazio={{
+          titulo: "Nenhum clube cadastrado",
+          descricao:
+            "A classificação mostra todos os clubes, mesmo os que ainda não jogaram.",
+          icone: <ListOrdered />,
+        }}
         chave={(l) => l.club_id}
       />
       <p className="text-xs text-muted-foreground">

@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronRight, Plus, Shield } from "lucide-react";
+import { CabecalhoPagina } from "@/components/cabecalho-pagina";
 import { useCallback, useState } from "react";
 import { CampoSelect, type OpcaoSelect } from "@/components/campo-select";
 import { FormularioClube } from "@/components/formulario-clube";
@@ -22,15 +24,30 @@ const COLUNAS: Coluna<Clube>[] = [
   {
     titulo: "Clube",
     celula: (c) => (
-      <Link
-        href={`/clubes/${c.id}`}
-        className="font-medium underline-offset-4 hover:underline"
-      >
-        {c.name}
-      </Link>
+      <span className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-9 items-center justify-center rounded-md border bg-muted text-xs font-semibold"
+        >
+          {c.acronym}
+        </span>
+        <Link
+          href={`/clubes/${c.id}`}
+          className="font-medium underline-offset-4 hover:underline"
+        >
+          {c.name}
+        </Link>
+      </span>
     ),
   },
-  { titulo: "Sigla", celula: (c) => c.acronym },
+  {
+    titulo: "Sigla",
+    celula: (c) => (
+      <span className="rounded-md border px-1.5 py-0.5 text-xs font-semibold">
+        {c.acronym}
+      </span>
+    ),
+  },
   { titulo: "Caixa", celula: (c) => formatarMoeda(c.cash), numerica: true },
   {
     titulo: "Valor do elenco",
@@ -39,8 +56,20 @@ const COLUNAS: Coluna<Clube>[] = [
   },
   {
     titulo: "Patrimônio",
-    celula: (c) => formatarMoeda(c.net_worth),
+    celula: (c) => <strong>{formatarMoeda(c.net_worth)}</strong>,
     numerica: true,
+  },
+  {
+    titulo: "Ações",
+    celula: (c) => (
+      <Link
+        href={`/clubes/${c.id}`}
+        className="inline-flex items-center gap-1 text-sm font-medium"
+      >
+        Ver clube
+        <ChevronRight aria-hidden="true" className="size-4" />
+      </Link>
+    ),
   },
 ];
 
@@ -53,10 +82,16 @@ export default function PaginaClubes() {
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Clubes</h1>
-        <Button onClick={() => setCriando(true)}>Novo clube</Button>
-      </div>
+      <CabecalhoPagina
+        icone={Shield}
+        titulo="Clubes"
+        descricao="Cada clube começa com 300,00 em caixa e sem jogadores. A liga aceita no máximo 20 clubes."
+      >
+        <Button onClick={() => setCriando(true)}>
+          <Plus aria-hidden="true" className="size-4" />
+          Novo clube
+        </Button>
+      </CabecalhoPagina>
 
       <div className="max-w-xs">
         <CampoSelect
@@ -72,7 +107,18 @@ export default function PaginaClubes() {
         linhas={dados}
         carregando={carregando}
         erro={erro}
-        vazio="Nenhum clube cadastrado. Crie o primeiro no botão acima."
+        tituloErro="Não foi possível carregar os clubes"
+        vazio={{
+          titulo: "Nenhum clube cadastrado",
+          descricao: "Crie o primeiro clube para começar.",
+          icone: <Shield />,
+          acao: (
+            <Button onClick={() => setCriando(true)}>
+              <Plus aria-hidden="true" className="size-4" />
+              Novo clube
+            </Button>
+          ),
+        }}
         chave={(c) => c.id}
         aoTentarDeNovo={recarregar}
       />

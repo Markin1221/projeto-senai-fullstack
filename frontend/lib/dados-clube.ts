@@ -29,3 +29,6 @@ export function paraCorpoClube(dados: DadosFormularioClube): NovoClube {
     acronym: dados.acronym.trim().toUpperCase(),
   };
 }
+
+/** Máximo de jogadores no elenco de um clube. */
+export const LIMITE_ELENCO = 12;

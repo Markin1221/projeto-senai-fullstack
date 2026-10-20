@@ -38,3 +38,36 @@ const ROTULOS_CONDICAO: Record<Condicao, string> = {
 };
 export const rotuloCondicao = (condicao: Condicao) =>
   ROTULOS_CONDICAO[condicao];
+
+export const NOMES_POSICAO: Record<string, string> = {
+  GOL: "Goleiro",
+  ZAG: "Zagueiro",
+  LAT: "Lateral",
+  MEI: "Meio-campo",
+  ATA: "Atacante",
+};
+
+const soData = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+const soHora = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+const numeroComVirgula = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** "2028-11-03T11:20:00-03:00" -> "03/11/2028" (horário de Brasília) */
+export const formatarData = (iso: string) => soData.format(new Date(iso));
+
+/** "2028-11-03T11:20:00-03:00" -> "11:20" (horário de Brasília) */
+export const formatarHora = (iso: string) => soHora.format(new Date(iso));
+
+/** 51.58 -> "51,58" (sem símbolo de moeda) */
+export const formatarNumero = (valor: number) => numeroComVirgula.format(valor);
