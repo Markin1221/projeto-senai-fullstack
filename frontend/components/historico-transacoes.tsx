@@ -6,18 +6,25 @@ import {
   CircleDollarSign,
   Download,
   HandCoins,
+  History,
   Receipt,
   ShoppingCart,
   TriangleAlert,
   User,
 } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { AlertaErro } from "@/components/alerta-erro";
 import { AvatarIniciais } from "@/components/avatar-iniciais";
 import { TabelaDados, type Coluna } from "@/components/tabela-dados";
 import { Button } from "@/components/ui/button";
 import { useDados } from "@/hooks/use-dados";
 import { useEnvio } from "@/hooks/use-envio";
-import { baixarCsvDoClube, listarTransacoes } from "@/lib/api";
+import {
+  ApiError,
+  baixarCsvDoClube,
+  listarTransacoes,
+  mensagemDeErro,
+} from "@/lib/api";
 import { avisarErro, avisarSucesso } from "@/lib/avisos";
 import { nomeDeArquivoSeguro, salvarArquivo } from "@/lib/download";
 import {
@@ -147,12 +154,25 @@ export function HistoricoTransacoes({ clubeId, clubeNome, caixaAtual }: Props) {
     () => ({ type: tipos.join(","), player_id: jogador }),
     [tipos, jogador],
   );
-  const carregar = useCallback(
-    () => listarTransacoes(clubeId, consulta),
-    [clubeId, consulta],
-  );
+  // Recusa da API (4xx, como filtro de jogador excluído): mantém os filtros e
+  // mostra o `message` no lugar da tabela e dos totais.
+  const carregar = useCallback(async () => {
+    try {
+      return { resposta: await listarTransacoes(clubeId, consulta) };
+    } catch (e) {
+      if (e instanceof ApiError && e.status >= 400 && e.status < 500) {
+        return { recusa: mensagemDeErro(e) };
+      }
+      throw e;
+    }
+  }, [clubeId, consulta]);
   const carregarTodas = useCallback(() => listarTransacoes(clubeId), [clubeId]);
-  const { dados, carregando, erro, recarregar } = useDados(carregar);
+  const { dados: resultado, carregando, erro, recarregar } = useDados(carregar);
+  const dados =
+    resultado && "resposta" in resultado ? resultado.resposta : undefined;
+  const recusa =
+    resultado && "recusa" in resultado ? resultado.recusa : undefined;
+  const filtrado = tipos.length > 0 || jogador !== "";
   const { dados: todas } = useDados(carregarTodas);
 
   const jogadores = useMemo(() => {
@@ -177,7 +197,17 @@ export function HistoricoTransacoes({ clubeId, clubeNome, caixaAtual }: Props) {
         arquivo,
         `Histórico de ${nomeDeArquivoSeguro(clubeNome)}.csv`,
       );
-      avisarSucesso("CSV exportado.");
+      const filtros = [
+        tipos.length > 0 &&
+          `filtro de tipo ${tipos.map((t) => TIPOS.find((x) => x.valor === t)?.rotulo).join(" e ")}`,
+        jogador !== "" && "filtro de jogador",
+      ].filter(Boolean);
+      avisarSucesso(
+        "CSV baixado",
+        filtros.length > 0
+          ? `Com o ${filtros.join(" e o ")} aplicado.`
+          : "Com todas as transações do clube.",
+      );
     } catch (erroExportacao) {
       avisarErro(erroExportacao);
     }
@@ -254,9 +284,29 @@ export function HistoricoTransacoes({ clubeId, clubeNome, caixaAtual }: Props) {
               ))}
             </select>
           </div>
+          {filtrado && (
+            <button
+              type="button"
+              onClick={() => {
+                setTipos([]);
+                setJogador("");
+              }}
+              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+            >
+              Limpar filtros
+            </button>
+          )}
         </div>
 
-        <div className="border-t [&_thead]:bg-muted/50">
+        {recusa && (
+          <div className="border-t p-5">
+            <AlertaErro titulo="O filtro foi recusado" mensagem={recusa} />
+          </div>
+        )}
+
+        <div
+          className={cn("border-t [&_thead]:bg-muted/50", recusa && "hidden")}
+        >
           <TabelaDados
             semBorda
             colunas={COLUNAS}
@@ -265,10 +315,10 @@ export function HistoricoTransacoes({ clubeId, clubeNome, caixaAtual }: Props) {
             erro={erro}
             tituloErro="Não foi possível carregar o histórico"
             vazio={{
-              titulo: "Nenhuma compra ou venda",
+              titulo: "Nenhuma transação ainda",
               descricao:
-                "As compras e vendas do clube aparecem aqui, com os totais.",
-              icone: <Receipt />,
+                "As compras e vendas do clube aparecem aqui, com os totais logo abaixo.",
+              icone: <History />,
             }}
             chave={(t) => t.id}
             aoTentarDeNovo={recarregar}

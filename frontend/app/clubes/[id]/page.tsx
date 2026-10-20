@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Abas } from "@/components/abas";
 import { EstadoCentral } from "@/components/estado-central";
+import { useMigalhaFinal } from "@/components/migalha-final";
 import { AvatarIniciais } from "@/components/avatar-iniciais";
 import { AlertaErro } from "@/components/alerta-erro";
 import { CartaoIndicador } from "@/components/cartao-indicador";
@@ -137,6 +138,8 @@ export default function PaginaClube() {
   }, [id]);
   const { dados: clube, carregando, erro, recarregar } = useDados(carregar);
   const colunas = useMemo(() => criarColunas(setVendendo), []);
+
+  useMigalhaFinal(clube?.name);
 
   const totalJogadores = clube?.players.length ?? 0;
   const abas = [

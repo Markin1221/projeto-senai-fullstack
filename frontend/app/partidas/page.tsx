@@ -1,10 +1,10 @@
 "use client";
 
 import { Plus, Swords } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { AlertaErro } from "@/components/alerta-erro";
 import { CabecalhoPagina } from "@/components/cabecalho-pagina";
-import { DetalhePartida } from "@/components/detalhe-partida";
 import { FormularioPartida } from "@/components/formulario-partida";
 import { HistoricoPartidas } from "@/components/historico-partidas";
 import { Modal } from "@/components/modal";
@@ -19,7 +19,7 @@ export default function PaginaPartidas() {
   const carregar = useCallback(() => listarClubes({ size: 100 }), []);
   const { dados, erro, recarregar } = useDados(carregar);
   const [criando, setCriando] = useState(false);
-  const [aberta, setAberta] = useState<Partida | null>(null);
+  const roteador = useRouter();
   const [versao, setVersao] = useState(0);
 
   const carregarUltima = useCallback(
@@ -36,10 +36,13 @@ export default function PaginaPartidas() {
     [clubes],
   );
 
+  const verDuelos = (partida: Partida) =>
+    roteador.push(`/partidas/${partida.id}`);
+
   const aoJogar = (partida: Partida) => {
     setCriando(false);
     setVersao((v) => v + 1);
-    setAberta(partida);
+    roteador.push(`/partidas/${partida.id}`);
     avisarSucesso(
       "Partida jogada",
       `${partida.home.club_name} ${partida.home.goals} × ${partida.away.goals} ${partida.away.club_name}. Placar e duelos devolvidos pela API.`,
@@ -65,13 +68,13 @@ export default function PaginaPartidas() {
         <UltimaPartida
           partida={ultima}
           siglas={siglas}
-          aoVerDuelos={setAberta}
+          aoVerDuelos={verDuelos}
         />
       )}
       <HistoricoPartidas
         clubes={clubes}
         versao={versao}
-        aoVerDuelos={setAberta}
+        aoVerDuelos={verDuelos}
       />
 
       <Modal
@@ -86,19 +89,6 @@ export default function PaginaPartidas() {
           aoJogar={aoJogar}
           aoFechar={() => setCriando(false)}
         />
-      </Modal>
-
-      <Modal
-        aberto={aberta !== null}
-        titulo={
-          aberta
-            ? `${aberta.home.club_name} ${aberta.home.goals} × ${aberta.away.goals} ${aberta.away.club_name}`
-            : "Duelos da partida"
-        }
-        largura="max-w-5xl"
-        aoFechar={() => setAberta(null)}
-      >
-        {aberta && <DetalhePartida partidaId={aberta.id} />}
       </Modal>
     </section>
   );

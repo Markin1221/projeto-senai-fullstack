@@ -41,7 +41,11 @@ export function BarraLateral() {
 
   return (
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-5 overflow-y-auto border-r border-sidebar-border p-4">
-      <div className="flex items-center gap-3 px-2">
+      <Link
+        href="/"
+        aria-label="Passe, ir para a tela inicial"
+        className="flex items-center gap-3 px-2"
+      >
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary font-semibold text-primary-foreground">
           P
         </div>
@@ -49,7 +53,7 @@ export function BarraLateral() {
           <p className="text-sm font-semibold">Passe</p>
           <p className="text-xs text-muted-foreground">Gestão da liga</p>
         </div>
-      </div>
+      </Link>
 
       <MenuPrincipal
         contagens={
